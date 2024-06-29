@@ -1,0 +1,2 @@
+video aulas angular => https://www.youtube.com/watch?v=fk4eIoy1l_M&list=PLWgD0gfm500Fhx8xSutDtEu8Q2hKTQpB9&index=10
+video aulas nodejs => https://www.youtube.com/watch?v=vmfvVwt137o&list=PLWgD0gfm500EMEDPyb3Orb28i7HK5_DkR&index=22
