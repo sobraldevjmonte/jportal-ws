@@ -26,9 +26,9 @@ exports.listarProdutosNp = async (req, res) => {
     "FROM " +
     "	  vs_analise_np p " +
     "WHERE  " +
-    "	  p.np = $1" + 
-    'GROUP BY ' + 
-    '   p.fator_financeiro, P.codproduto, P.PRODUTO, P.CODGRUPO,P.COMPRADOR, P.QUANTIDADE, P.VALOR_UND, P.VLR_VENDIDO, P.VLR_TABELA, P.DESCONTO, P.IMPOSTO, P.DESP_ADM, P.LUCRO, P.TAXAENTREGA'
+    "	  p.np = $1" +
+    "GROUP BY " +
+    "   p.fator_financeiro, P.codproduto, P.PRODUTO, P.CODGRUPO,P.COMPRADOR, P.QUANTIDADE, P.VALOR_UND, P.VLR_VENDIDO, P.VLR_TABELA, P.DESCONTO, P.IMPOSTO, P.DESP_ADM, P.LUCRO, P.TAXAENTREGA";
 
   console.log(sqlLListaProdutosNp);
   try {
@@ -52,8 +52,8 @@ exports.listarProdutosNp = async (req, res) => {
       "   VS_ANALISE_NP P " +
       "WHERE P.NP = $1";
 
-      let rst = await pg.execute(sqlTotaisDaNp, [np]);
-      rs.rows.push(rst.rows[0]);
+    let rst = await pg.execute(sqlTotaisDaNp, [np]);
+    rs.rows.push(rst.rows[0]);
 
     const response = {
       registros: countProdutosNp,
@@ -61,7 +61,7 @@ exports.listarProdutosNp = async (req, res) => {
       lista_produtos_np: rs.rows,
     };
     res.status(200).send(response);
-  } catch (error) { 
+  } catch (error) {
     console.log(error);
     return res.status(404).send({ error: error, mensagem: "Erro ao procurar" });
   }
@@ -75,12 +75,17 @@ exports.listarNps = async (req, res) => {
 
   // console.log(ano + ' ' + mes );
 
-
   // let data = "2024-03-01";
-  let dataInicio = ano + '/' + mes + '/01';
-  let dataFim = ano + '/' + mes + '/30';
-  console.log(dataInicio)
-  console.log(dataFim)
+  let dataInicio = ano + "/" + mes + "/01";
+  let dataFim = "";
+  if (mes === 2) {
+    dataFim = ano + "/" + mes + "/28";
+    console.log(dataInicio);
+  } else {
+    dataFim = ano + "/" + mes + "/30";
+  }
+  console.log(dataInicio);
+  console.log(dataFim);
   let nulo = "";
 
   const sqlLListaNps =
@@ -121,9 +126,8 @@ exports.listarNps = async (req, res) => {
     let rs = await pg.execute(sqlLListaNps, [dataInicio, dataFim, idLoja]);
     let countNps = rs.rows.length;
 
-
-    for(let i = 0; i < countNps; i++) {
-      rs.rows[i].key = i + 1
+    for (let i = 0; i < countNps; i++) {
+      rs.rows[i].key = i + 1;
     }
 
     const response = {
