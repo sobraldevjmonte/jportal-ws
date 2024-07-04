@@ -37,7 +37,7 @@ exports.listarClientes = async (req, res) => {
     "ORDER BY " +
     '   u."nomeUsuario"';
 
-  console.log(sqlLListaClientes);
+  // console.log(sqlLListaClientes);
   try {
     let rs = await pg.execute(sqlLListaClientes, [ativo, valorNivel]);
     let countIndicadores = rs.rows.length;
@@ -81,7 +81,7 @@ exports.listaLojas = async (req, res) => {
     "lojas l " +
     'ORDER BY l."idLoja"';
 
-  console.log(sqlLListaLojas);
+  // console.log(sqlLListaLojas);
   try {
     let rs = await pg.execute(sqlLListaLojas);
     const response = {
@@ -111,7 +111,7 @@ exports.listaVendedores = async (req, res) => {
     "ORDER BY " +
     '     u."nomeUsuario"';
 
-  console.log(sqlListaVendedores);
+  // console.log(sqlListaVendedores);
   /********************************************************/
   try {
     let rsCount = await pg.execute(sqlListaVendedores, [ativo]);
@@ -136,8 +136,7 @@ exports.listaVendedoresPorLoja = async (req, res) => {
   let idLoja = req.params.idLoja;
   let ordem = req.params.ordem;
   console.log("idLoja---------> " + idLoja);
-  console.log(
-    "------------------------------------------------------- ordem -------------------------------------------------------------------------------" +
+  console.log("------------------------------------------- ordem ----------------------------------------" +
       ordem
   );
   let ativo = "S";
@@ -157,10 +156,9 @@ exports.listaVendedoresPorLoja = async (req, res) => {
     "AND " +
     '     u."idLoja" = $2 ' +
     "AND " +
-    "     u.ativo = $1 " +
-    `ORDER BY  u."nomeUsuario" ${ordem}`;
+    "     u.ativo = $1 " 
 
-  console.log(sqlListaVendedores);
+  // console.log(sqlListaVendedores);
   /********************************************************/
   try {
     let rsCount = await pg.execute(sqlListaVendedores, [ativo, idLoja]);
@@ -216,7 +214,7 @@ exports.listaVendasVendedores = async (req, res) => {
     '     v.idvendedor = u."codigoVendedor"  ' +
     "   join lojas l on " +
     '     u."idLoja"  = l."idLoja" ' +
-    "     and u.ativo = $2" +
+    "     and u.ativo = $2 " +
     "WHERE " +
     "     v.idvendedor = $1 " +
     `ORDER BY v."totalGeraPendenteCadaCliente" ${ordem}`;
@@ -561,7 +559,7 @@ exports.listaSomaEtapasPeloVendedor = async (req, res) => {
     "   WHERE " +
     "     v.idvendedor = $1 ) AS subquery";
 
-  console.log(sqlListaSomaEtapasPeloVendedor);
+  // console.log(sqlListaSomaEtapasPeloVendedor);
 
   try {
     let rsSomaEtapasPeloVendedor = await pg.execute(
@@ -710,7 +708,7 @@ exports.listaAdminPendenciasPorLoja = async (req, res) => {
 ///************************** soma pendencias admin geral ************************/
 exports.listaAdminSomaPendenciasPorLoja = async (req, res) => {
   console.log(
-    "-------------- listaAdminSomaPendenciasPorLoja(Admin) ---------------------------------xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    "-------------- listaAdminSomaPendenciasPorLoja(Admin) --------------------------------- "
   );
   let idUsuario = req.params.idUsuario;
   console.log("idUsuario ---------> " + idUsuario);
@@ -811,39 +809,8 @@ exports.listaAdminSomaPendenciasPorLoja = async (req, res) => {
     '     usuarios u ON   v.idvendedor = u."codigoVendedor" ' +
     "   JOIN " +
     '     lojas l ON u."idLoja" = l."idLoja") AS subquery';
-  // let sqlListaAdminSomaEtapasPorLoja =
-  //   "SELECT " +
-  //   "   SUM(etapa1) AS etapa1, " +
-  //   "   SUM(etapa2) AS etapa2, " +
-  //   "   SUM(etapa3) AS etapa3, " +
-  //   "   SUM(etapa4) AS etapa4, " +
-  //   "   SUM(etapa5) AS etapa5, " +
-  //   "   SUM(etapa6) AS etapa6, " +
-  //   "   SUM(etapa7) AS etapa7, " +
-  //   "   SUM(etapa8) AS etapa8, " +
-  //   "   SUM(etapa9) AS etapa9, " +
-  //   "   SUM(etapa10) AS etapa10, " +
-  //   "   SUM(etapa1) + SUM(etapa2) + SUM(etapa3) + SUM(etapa4) + SUM(etapa5) + SUM(etapa6) + SUM(etapa7) + SUM(etapa8) + SUM(etapa9) + SUM(etapa10) AS total " +
-  //   "FROM ( " +
-  //   "   SELECT " +
-  //   "     SUM(v.etapapend1) AS etapa1, " +
-  //   "     SUM(v.etapapend2) AS etapa2, " +
-  //   "     SUM(v.etapapend3) AS etapa3, " +
-  //   "     SUM(v.etapapend4) AS etapa4, " +
-  //   "     SUM(v.etapapend5) AS etapa5, " +
-  //   "     SUM(v.etapapend6) AS etapa6, " +
-  //   "     SUM(v.etapapend7) AS etapa7, " +
-  //   "     SUM(v.etapapend8) AS etapa8, " +
-  //   "     SUM(v.etapapend9) AS etapa9, " +
-  //   "   SUM(v.etapapend10) AS etapa10 " +
-  //   "   FROM " +
-  //   '     "vendasPendentesFinal" v ' +
-  //   "   JOIN " +
-  //   '     usuarios u ON   v.idvendedor = u."codigoVendedor" ' +
-  //   "   JOIN " +
-  //   '     lojas l ON u."idLoja" = l."idLoja") AS subquery';
 
-  console.log(sqlListaAdminSomaEtapasPorLoja);
+  // console.log(sqlListaAdminSomaEtapasPorLoja);
 
   try {
     let rsSomaEtapasPorLoja = await pg.execute(sqlListaAdminSomaEtapasPorLoja);
