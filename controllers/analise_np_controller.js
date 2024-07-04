@@ -69,16 +69,28 @@ exports.listarProdutosNp = async (req, res) => {
 exports.listarNps = async (req, res) => {
   console.log("------------- listarNps(AnaliseNp) -------------------");
 
+  let mes = +req.params.mes;
+  let ano = +req.params.ano;
   let idLoja = +req.params.idLoja;
-  let data = "2024-03-01";
+
+  // console.log(ano + ' ' + mes );
+
+
+  // let data = "2024-03-01";
+  let dataInicio = ano + '/' + mes + '/01';
+  let dataFim = ano + '/' + mes + '/30';
+  console.log(dataInicio)
+  console.log(dataFim)
   let nulo = "";
 
   const sqlLListaNps =
     "select " +
     "   distinct (a.np) , " +
-    "   TO_CHAR(a.data,'DD/MM/YYYY') AS data , " +
+    "   TO_CHAR(a.data,'DD/MM/YYYY') AS data_formatada , " +
     "   a.chave , " +
+    "   a.data , " +
     "   a.codvendedor , " +
+    "   a.codlojavendedor , " +
     "   a.vendedor , " +
     "   a.autorizacao , " +
     "   a.tipoentrega , " +
@@ -96,15 +108,17 @@ exports.listarNps = async (req, res) => {
     "     LEFT JOIN analise_np ap ON " +
     "         a.np = ap.np " +
     "where " +
-    "     a.data >= $1 " +
+    "     a.data between $1 and $2 " +
     "and " +
-    "     a.np != $2 " +
+    "    COALESCE(NULLIF(a.np, ''), NULL) IS NOT NULL " +
+    "and " +
+    "    a.codlojavendedor = $3 " +
     "order by " +
-    "     a.np";
+    "     a.data";
 
   console.log(sqlLListaNps);
   try {
-    let rs = await pg.execute(sqlLListaNps, [data, nulo]);
+    let rs = await pg.execute(sqlLListaNps, [dataInicio, dataFim, idLoja]);
     let countNps = rs.rows.length;
 
 
