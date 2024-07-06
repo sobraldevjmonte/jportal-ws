@@ -1,3 +1,4 @@
+const { diffieHellman } = require("crypto");
 const pg = require("../conexao_dwh");
 const moment = require("moment");
 
@@ -71,21 +72,26 @@ exports.listarNps = async (req, res) => {
 
   let mes = +req.params.mes;
   let ano = +req.params.ano;
+
   let idLoja = +req.params.idLoja;
 
+  let diaFim = "31";
+  if (mes === 4 || mes === 6 || mes === 9 || mes === 11) {
+    diaFim = "30";
+  }
+  if (mes === 2) {
+    diaFim = "28";
+  }
   // console.log(ano + ' ' + mes );
 
   // let data = "2024-03-01";
   let dataInicio = ano + "/" + mes + "/01";
   let dataFim = "";
-  if (mes === 2) {
-    dataFim = ano + "/" + mes + "/28";
-    console.log(dataInicio);
-  } else {
-    dataFim = ano + "/" + mes + "/30";
-  }
+  dataFim = ano + "/" + mes + "/" + diaFim;
+
   console.log(dataInicio);
   console.log(dataFim);
+  console.log(idLoja)
   let nulo = "";
 
   const sqlLListaNps =
