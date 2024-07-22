@@ -4,14 +4,6 @@ dotenv.config({ path: `${__dirname}/config.env` });
 
 
 const { Pool } = require('pg');
-/*const client = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'profdurafix',
-    password: 'postgres',
-    port: 5432,
-});*/
-
 const pool = new Pool({
     "connectionLimit": 10000,
     "host": process.env.POSTGRES_HOST,

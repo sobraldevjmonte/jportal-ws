@@ -6,6 +6,7 @@
         "POSTGRES_PORT": "5432",
         "POSTGRES_DATABASE": "dwh",
         "POSTGRES_DATABASE_JMONTE":"jportal",
+        "POSTGRES_DATABASE_PROF_JMONTE":"profjmonte",
         "JWT_KEY": "key",
         "URL_API": "http://localhost:3020/"
     }
