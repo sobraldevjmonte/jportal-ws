@@ -2,6 +2,8 @@ const dotenv = require('dotenv');
 //require('dotenv').config()
 dotenv.config({ path: `${__dirname}/config.env` });
 
+:wq
+
 
 const { Pool } = require('pg');
 /*const client = new Pool({
