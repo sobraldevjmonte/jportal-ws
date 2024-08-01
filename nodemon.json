@@ -5,7 +5,6 @@
         "POSTGRES_PASSWORD": "postgres",
         "POSTGRES_PORT": "5432",
         "POSTGRES_DATABASE": "dwh",	
-		"POSTGRES_DATABASE_JMONTE":"j-portal",
 		"POSTGRES_DATABASE_JMONTE":"jportal",
         "POSTGRES_DATABASE_PROF_JMONTE":"profjmonte",
 		"JWT_KEY": "key",
