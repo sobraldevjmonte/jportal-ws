@@ -165,6 +165,8 @@ exports.salvarNp = async (req, res) => {
   }
 };
 
+
+
 exports.buscaNp = async (req, res) => {
   let numero_np = req.params.numero_np;
   let sqlBuscaNp =

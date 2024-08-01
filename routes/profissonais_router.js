@@ -26,13 +26,6 @@ router.post('/profissionais/anexar-arquivo', uploadImagens.single('imagembrinde'
     }
     res.status(200).send({ message: 'Arquivo carregado com sucesso!', file: req.file });
   });
-//---------- salvar anexos ---------
-//---------- salvar imagem do produto ---------
-// router.post("/profissionais/anexar-arquivo",uploadImagens.single("imagembrinde"),ProfissionaisController.nada);
-
-// router.post('profissionais//anexar-arquivo', uploadImagens.single('imagembrinde'), (req, res) => {
-//     res.status(200).send({ message: 'Arquivo carregado com sucesso!' });
-//   });
   
 router.post("/profissionais/salvar-brinde",ProfissionaisController.salvarImagem);
 router.put("/profissionais/atualizar-brinde",ProfissionaisController.atualizarImagem);
