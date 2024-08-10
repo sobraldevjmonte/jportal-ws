@@ -9,6 +9,7 @@ const rotaEtapas = require("./routes/etapas_router");
 const rotaUsuarios = require("./routes/usuarios_router");
 const rotaAnaliseNp = require("./routes/analise_np_router");
 const rotaProfissionais = require("./routes/profissonais_router");
+const rotaProfissionaisPedidos = require("./routes/profissonais_pedidos_router");
 
 app.use(morgan("dev"));
 app.use(bodyParser.urlencoded({ extended: false })); //apenas dados simples
@@ -39,6 +40,7 @@ app.use("/rt/v1", rotaEtapas);
 app.use("/rt/v1", rotaUsuarios);
 app.use("/rt/v1", rotaAnaliseNp);
 app.use("/rt/v1", rotaProfissionais);
+app.use("/rt/v1", rotaProfissionaisPedidos);
 //----------- quando nao encontra a rota --------------
 app.use((req, res, next) => {
     const erro = new Error("Rota não encontrada!");

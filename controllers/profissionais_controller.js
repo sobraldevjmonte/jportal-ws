@@ -258,6 +258,7 @@ exports.listarPedidos = async (req, res) => {
 };
 
 exports.nada = async (req, res) => {
+  console.log('nada', req)
   res.status(200).send("resposta de anexar arquivo fazer nada");
 };
 exports.premiosListar = async (req, res) => {
@@ -324,38 +325,69 @@ exports.atualizarImagem = async (req, res) => {
       .send({ error: error, mensagem: "Não foi possivel atualizar!" });
   }
 };
-exports.salvarImagem = async (req, res) => {
-  let dados = req.body;
-  let descricao = dados.descricao;
-  let pontos = dados.pontos;
-  let valor = dados.valor;
-  let quantidade = dados.quantidade;
-  let link_anexo = dados.imagem;
-  let ativo = "S";
 
-  let sqlInsertValorTotal =
-    "INSERT INTO " +
-    "brindes " +
-    "(descricao, pontos, valor, quantidade, imagem, ativo) " +
-    "VALUES ($1, $2, $3, $4, $5 , $6)";
-  try {
-    await pg.execute(sqlInsertValorTotal, [
-      descricao,
-      pontos,
-      valor,
-      quantidade,
-      link_anexo,
-      ativo,
-    ]);
+exports.salvarBrinde = async (req, res) => {
+  const ativo = "S";
+  const { descricao, pontos, valor, quantidade, imagem } = req.body;
+  const resultInsert = await pg.execute(
+    "INSERT INTO brindes (descricao, pontos, valor, quantidade, imagem, ativo) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+    [descricao.toUpperCase(), pontos, valor, quantidade, imagem, ativo]
+  );
 
-    const response = {
-      mensagem: "Imagem do brinde atualizado!",
-    };
-    console.log("--------- SALVAR IMAGEM BRINDE -------");
-    res.status(201).send(response);
-  } catch (error) {
-    return res
-      .status(500)
-      .send({ error: error, mensagem: "Não foi possivel salvar!" });
-  }
+  const response = {
+    mensagem: "Brinde cadastrado com sucesso!",
+    brinde: {
+      id_brinde: resultInsert.rows[0].id_brinde,
+      descricao: descricao,
+    },
+  };
+  res.status(201).send(response);
 };
+
+
+// exports.salvarImagem = async (req, res) => {
+//   console.log("--------- salvarImagem 1 -------");
+//   let dados = req.body;
+//   let descricao = dados.descricao;
+//   let pontos = +dados.pontos;
+//   let valor = +dados.valor;
+//   let quantidade = +dados.quantidade;
+//   let link_anexo = dados.imagem;
+//   let ativo = "S";
+
+//   console.log(dados)
+
+//   let sqlInsertValorTotal =
+//     "INSERT INTO " +
+//     "brindes " +
+//     "(descricao, pontos, valor, quantidade, imagem, ativo) " +
+//     "VALUES ($1, $2, $3, $4, $5 , $6)";
+//     console.log('---------------- xibiu 1 -----------------')
+//     console.log(sqlInsertValorTotal)
+
+//   try {
+//     let rs = await pg.execute(sqlInsertValorTotal, [
+//       descricao,
+//       pontos,
+//       valor,
+//       quantidade,
+//       link_anexo,
+//       ativo,
+//     ]);
+
+//     // console.log(rs)
+
+   
+
+//     console.log('---------------- xibiu 2 -----------------')
+//     // const response = {
+//     //   mensagem: "Imagem do brinde atualizado!",
+//     // };
+//     console.log("--------- SALVAR IMAGEM BRINDE -------");
+//     res.status(201).send('****************** xibiu 2 ******************');
+//   } catch (error) {
+//     return res
+//       .status(500)
+//       .send({ error: error, mensagem: "Não foi possivel salvar!" });
+//   }
+// };

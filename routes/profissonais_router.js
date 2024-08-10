@@ -18,16 +18,25 @@ router.put("/profissionais/rejeitar-np/:id_vendas", ProfissionaisController.reje
 //********************* PREMIOS CADASTRO *************************/
 router.get("/profissionais/premios-listar", ProfissionaisController.premiosListar);
 
+// router.post('/profissionais/anexar-arquivo', uploadImagens.single('imagembrinde'), ProfissionaisController.nada);
+
+// router.post('/profissionais/anexar-arquivo', uploadImagens.single('imagembrinde'), (req, res) => {
+//   console.log('Arquivo recebido:', req.file);
+//   ProfissionaisController.nada(req, res);
+// });
+
+  
 router.post('/profissionais/anexar-arquivo', uploadImagens.single('imagembrinde'), (req, res) => {
     console.log(req.body)
     // console.log(typeof req.body);
-    if (!req.file) {
-        return res.status(400).send({ msg: 'Nenhum arquivo enviado.' });
-    }
     res.status(200).send({ message: 'Arquivo carregado com sucesso!', file: req.file });
+    // if (!req.file) {
+    //     return res.status(400).send({ msg: 'Nenhum arquivo enviado.' });
+    // }
   });
   
-router.post("/profissionais/salvar-brinde",ProfissionaisController.salvarImagem);
+router.post("/profissionais/salvar-brinde",ProfissionaisController.salvarBrinde);
+// router.post("/profissionais/salvar-brinde",ProfissionaisController.salvarImagem);
 router.put("/profissionais/atualizar-brinde",ProfissionaisController.atualizarImagem);
 
 
