@@ -36,6 +36,8 @@ router.post('/profissionais/anexar-arquivo', uploadImagens.single('imagembrinde'
   });
   
 router.post("/profissionais/salvar-brinde",ProfissionaisController.salvarBrinde);
+router.delete("/profissionais/excluir-brinde/:id_brinde",ProfissionaisController.excluirBrinde);
+router.put("/profissionais/inativar-brinde/:id_brinde",ProfissionaisController.inativarBrinde);
 // router.post("/profissionais/salvar-brinde",ProfissionaisController.salvarImagem);
 router.put("/profissionais/atualizar-brinde",ProfissionaisController.atualizarImagem);
 

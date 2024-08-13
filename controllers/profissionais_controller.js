@@ -165,8 +165,6 @@ exports.salvarNp = async (req, res) => {
   }
 };
 
-
-
 exports.buscaNp = async (req, res) => {
   let numero_np = req.params.numero_np;
   let sqlBuscaNp =
@@ -258,12 +256,12 @@ exports.listarPedidos = async (req, res) => {
 };
 
 exports.nada = async (req, res) => {
-  console.log('nada', req)
+  console.log("nada", req);
   res.status(200).send("resposta de anexar arquivo fazer nada");
 };
 exports.premiosListar = async (req, res) => {
   const pathImagem = "/brindes";
-  let sqlListarPremios = "SELECT * FROM brindes";
+  let sqlListarPremios = "SELECT * FROM brindes ORDER BY id_brinde";
 
   try {
     let rs = await pg.execute(sqlListarPremios);
@@ -326,6 +324,52 @@ exports.atualizarImagem = async (req, res) => {
   }
 };
 
+exports.inativarBrinde = async (req, res) => {
+  let id_brinde = req.params.id_brinde;
+  let sqlVerificaStatus = "SELECT ativo FROM brindes WHERE id_brinde = $1";
+  let st = "S";
+
+  let rsVerifica = await pg.execute(sqlVerificaStatus, [id_brinde]);
+  let status = rsVerifica.rows[0].ativo;
+  console.log("status ------------------> " + status);
+  if (status === "S") st = "N";
+
+  let sqlAtualizaEstado = "UPDATE brindes SET ativo = $2 WHERE id_brinde = $1";
+  await pg.execute(sqlAtualizaEstado, [id_brinde, st]);
+
+  const response = {
+    mensagem: "Brinde atuallizado!",
+  };
+  res.status(200).send(response);
+};
+
+exports.excluirBrinde = async (req, res) => {
+  let id_brinde = req.params.id_brinde;
+  let sqlVerificaMovimento =
+    "SELECT * FROM brindes_premiacoes WHERE id_premio = $1";
+  let rsVerifica = await pg.execute(sqlVerificaMovimento, [id_brinde]);
+  let regVerifica = rsVerifica.rows.length;
+  if (regVerifica > 0) {
+
+    const response = {
+      mensagem: `Não é possível excluir! Existem ${regVerifica} registros relacionados a esse brinde.`,
+      quantidade: regVerifica,
+    };
+    res.status(409).send(response);
+  } else {
+    try {
+      let sqlExcluirBrinde = "DELETE FROM brindes WHERE id_brinde = $1";
+      await pg.execute(sqlExcluirBrinde, [id_brinde]);
+      const response = {
+        mensagem: "Brinde excluido com sucesso!",
+        quantidade: regVerifica,
+      };
+      res.status(200).send(response);
+    } catch (error) {
+      res.status(500).send("Erro na requisição");
+    }
+  }
+};
 exports.salvarBrinde = async (req, res) => {
   const ativo = "S";
   const { descricao, pontos, valor, quantidade, imagem } = req.body;
@@ -343,51 +387,3 @@ exports.salvarBrinde = async (req, res) => {
   };
   res.status(201).send(response);
 };
-
-
-// exports.salvarImagem = async (req, res) => {
-//   console.log("--------- salvarImagem 1 -------");
-//   let dados = req.body;
-//   let descricao = dados.descricao;
-//   let pontos = +dados.pontos;
-//   let valor = +dados.valor;
-//   let quantidade = +dados.quantidade;
-//   let link_anexo = dados.imagem;
-//   let ativo = "S";
-
-//   console.log(dados)
-
-//   let sqlInsertValorTotal =
-//     "INSERT INTO " +
-//     "brindes " +
-//     "(descricao, pontos, valor, quantidade, imagem, ativo) " +
-//     "VALUES ($1, $2, $3, $4, $5 , $6)";
-//     console.log('---------------- xibiu 1 -----------------')
-//     console.log(sqlInsertValorTotal)
-
-//   try {
-//     let rs = await pg.execute(sqlInsertValorTotal, [
-//       descricao,
-//       pontos,
-//       valor,
-//       quantidade,
-//       link_anexo,
-//       ativo,
-//     ]);
-
-//     // console.log(rs)
-
-   
-
-//     console.log('---------------- xibiu 2 -----------------')
-//     // const response = {
-//     //   mensagem: "Imagem do brinde atualizado!",
-//     // };
-//     console.log("--------- SALVAR IMAGEM BRINDE -------");
-//     res.status(201).send('****************** xibiu 2 ******************');
-//   } catch (error) {
-//     return res
-//       .status(500)
-//       .send({ error: error, mensagem: "Não foi possivel salvar!" });
-//   }
-// };
