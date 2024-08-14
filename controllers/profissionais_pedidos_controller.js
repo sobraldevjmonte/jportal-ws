@@ -128,6 +128,7 @@ exports.rejeitaPedido = async (req, res) => {
     let statusDoPedido = result.rows[0].status;
 
     if (statusDoPedido === "PENDENTE" || statusDoPedido === "APROVADO") {
+      console.log("*********************** REJEITAR PEDIDO *****************");
       let dadosUsuario =
         "SELECT pontos_saldo FROM usuarios WHERE id_usuario = $1";
       let rsDadosUsuarios = await pg.execute(dadosUsuario, [id_parceiro]);
@@ -141,7 +142,7 @@ exports.rejeitaPedido = async (req, res) => {
 
       let statusFinalPedido = "REJEITADO";
       let sqlUpStatusPedido =
-        "UPDATE brindes_premiacoes SET status = $1, autorizado = false WHERE id_premiacao = $2";
+        "UPDATE brindes_premiacoes SET status = $1, id_autorizador = null, data_autorizacao = null, data_entrega=null, id_entregador = null, entregue = false, autorizado = false WHERE id_premiacao = $2";
       await pg.execute(sqlUpStatusPedido, [statusFinalPedido, id_pedido]);
     }
 
@@ -164,11 +165,10 @@ exports.liberarPedido = async (req, res) => {
   let rsDadosBrinde = await pg.execute(sqlDadosBrinde, [id_premio]);
   let estoque = rsDadosBrinde.rows[0].quantidade;
 
-  let saldoFinal = estoque - 1;
-    let sqlAtualizaEstado =
-      "UPDATE brindes SET quantidade = $1 WHERE id_brinde = $2";
-    await pg.execute(sqlAtualizaEstado, [saldoFinal, id_premio]);
-
+  // let saldoFinal = estoque - 1;
+  // let sqlAtualizaEstado =
+  //   "UPDATE brindes SET quantidade = $1 WHERE id_brinde = $2";
+  // await pg.execute(sqlAtualizaEstado, [saldoFinal, id_premio]);
 
   let statusFinalPedido = "PENDENTE";
   let sqlUpStatusPedido =

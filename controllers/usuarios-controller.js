@@ -13,6 +13,7 @@ exports.login = async (req, res) => {
     '   u."codigoVendedor" as codigousuario, ' +
     '   u."idLoja" , ' +
     '   u."idNivelUsuario" , ' +
+    '   u.sub_nivel1  , ' +
     '   u."nomeUsuario" as nomeusuario, ' +
     "   l.fantasia as loja, " +
     '   nu."descricaoNivel" as nivelusuario, ' +
@@ -40,7 +41,8 @@ exports.login = async (req, res) => {
         loja: rs.rows[0].loja,
         idLoja: rs.rows[0].idLoja,
         nivelusuario: rs.rows[0].nivelusuario,
-        idNivelUsuario: rs.rows[0].idNivelUsuario
+        idNivelUsuario: rs.rows[0].idNivelUsuario,
+        subNivel1: rs.rows[0].sub_nivel1
       };
       return res.status(200).send(response);
     } else {
