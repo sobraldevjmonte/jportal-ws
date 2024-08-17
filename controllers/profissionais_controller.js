@@ -289,29 +289,35 @@ exports.premiosListar = async (req, res) => {
 exports.atualizarImagem = async (req, res) => {
   let dados = req.body;
 
+  console.log(dados)
+
   let id_brinde = dados.id_brinde;
-  let descricao = dados.descricao;
+  let descricao = dados.descricao.toUpperCase();
   let pontos = dados.pontos;
-  let valor = dados.valor;
-  let quantidade = dados.quantidade;
+  let valor = +dados.valor;
+  let quantidade = +dados.quantidade;
   let link_anexo = dados.imagem;
   let ativo = dados.ativo;
+  let codigo = dados.codigo;
 
   let updateBrinde =
     "UPDATE brindes " +
-    "SET descricao = $1, pontos = $2, valor = $3, quantidade = $4, imagem = $5, ativo = $6  " +
-    "WHERE id_brinde = $7)";
+    "SET descricao = $1, pontos = $2, valor = $3, quantidade = $4, imagem = $5, ativo = $6 , codigo = $7 " +
+    "WHERE id_brinde = $8";
+    console.log('xxxxxxxxxxxxxxxxxxxxxxx')
   try {
-    await pg.execute(updateBrinde, [
+    let rs = await pg.execute(updateBrinde, [
       descricao,
       pontos,
       valor,
       quantidade,
       link_anexo,
       ativo,
-      id_brinde,
+      codigo,
+      id_brinde
     ]);
-
+    console.log('xxxxxxxxxxxxxxxxxxxxxxx')
+    console.log(rs)
     const response = {
       mensagem: "Imagem do brinde atualizado!",
     };
@@ -372,10 +378,10 @@ exports.excluirBrinde = async (req, res) => {
 };
 exports.salvarBrinde = async (req, res) => {
   const ativo = "S";
-  const { descricao, pontos, valor, quantidade, imagem } = req.body;
+  const { descricao, pontos, valor, quantidade, imagem, codigo } = req.body;
   const resultInsert = await pg.execute(
-    "INSERT INTO brindes (descricao, pontos, valor, quantidade, imagem, ativo) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-    [descricao.toUpperCase(), pontos, valor, quantidade, imagem, ativo]
+    "INSERT INTO brindes (descricao, pontos, valor, quantidade, imagem, ativo, codigo) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+    [descricao.toUpperCase(), pontos, valor, quantidade, imagem, ativo, codigo]
   );
 
   const response = {
