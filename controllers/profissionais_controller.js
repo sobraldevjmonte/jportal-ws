@@ -296,14 +296,14 @@ exports.atualizarImagem = async (req, res) => {
   let pontos = dados.pontos;
   let valor = +dados.valor;
   let quantidade = +dados.quantidade;
-  let link_anexo = dados.imagem;
+  // let link_anexo = dados.imagem;
   let ativo = dados.ativo;
   let codigo = dados.codigo;
 
   let updateBrinde =
     "UPDATE brindes " +
-    "SET descricao = $1, pontos = $2, valor = $3, quantidade = $4, imagem = $5, ativo = $6 , codigo = $7 " +
-    "WHERE id_brinde = $8";
+    "SET descricao = $1, pontos = $2, valor = $3, quantidade = $4, ativo = $5 , codigo = $6 " +
+    "WHERE id_brinde = $7";
     console.log('xxxxxxxxxxxxxxxxxxxxxxx')
   try {
     let rs = await pg.execute(updateBrinde, [
@@ -311,7 +311,6 @@ exports.atualizarImagem = async (req, res) => {
       pontos,
       valor,
       quantidade,
-      link_anexo,
       ativo,
       codigo,
       id_brinde
