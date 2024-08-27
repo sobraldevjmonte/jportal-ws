@@ -1,4 +1,5 @@
 const pg = require("../conexao_prof_jmonte");
+const pg_jmonte_prod = require("../conexao_jmonte_prod");
 const moment = require("moment");
 
 exports.inativarUsuario = async (req, res) => {
@@ -35,6 +36,47 @@ exports.ativarUsuario = async (req, res) => {
     return res.status(404).send({ error: error, mensagem: "Erro ao procurar" });
   }
 };
+exports.excluirUsuario = async (req, res) => {
+  let id = req.params.id;
+  let encontrado = 0;
+  let sqlBuscaOutrosPedidos = "SELECT * FROM VENDAS v WHERE v.id_usuario = $1";
+  let rs1 = await pg.execute(sqlBuscaOutrosPedidos, [id]);
+  if (rs1.rowCount === 1) {
+    encontrado++;
+  }
+  let sqlBuscaOutrosPedidosBrindes =
+    "SELECT * FROM brindes_premiacoes bp WHERE bp.id_parceiro = $1 or bp.id_autorizador = $1 or bp.id_entregador = $1";
+  let rs2 = await pg.execute(sqlBuscaOutrosPedidosBrindes, [id]);
+  if (rs2.rowCount === 1) {
+    encontrado++;
+  }
+
+  console.log("encontrado: " + encontrado);
+  if (encontrado > 0) {
+    const response = {
+      msg: 'Não é possível excluir.',
+    };
+    res.status(401).send(response);
+  } else {
+    console.log("******************* entrou no try do delete ***************");
+    let sqlDelete = "DELETE FROM usuarios WHERE id_usuario = $1";
+    try {
+      await pg.execute(sqlDelete, [id]);
+      const response = {
+        msg: "Deletado com sucesso",
+        //totais_np: rst.rows,
+        //lista_usuarios: rs.rows,
+      };
+      res.status(200).send(response);
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(404)
+        .send({ error: error, mensagem: "Erro ao procurar" });
+    }
+  }
+};
+
 exports.listarUsuarios = async (req, res) => {
   let sqlPedidos = "SELECT * FROM usuarios ORDER BY id_usuario";
   console.log("************** listarPedidos ********************");
@@ -132,10 +174,10 @@ exports.salvarNp = async (req, res) => {
   let formattedDate = date.format("YYYY-MM-DD");
 
   console.log(total_pontos);
-  console.log(formattedDate);
+  console.log('data_np: ' + data_np);
   console.log(valor_np);
   console.log(numero_np);
-  console.log(id_loja);
+  console.log('id_loja: ' + id_loja);
   console.log(id_np);
 
   let sqlUpdateNp =
@@ -165,41 +207,54 @@ exports.salvarNp = async (req, res) => {
   }
 };
 
+
 exports.buscaNp = async (req, res) => {
   let numero_np = req.params.numero_np;
   let sqlBuscaNp =
     "select sum(vpf.vlr_total) as vlr_total, sum(vpf.pp) as vlr_pp, " +
     "MAX(TO_CHAR(vpf.data_np,'DD/MM/YYYY')) AS data_np, " +
     "CAST(vpf.codloja AS INTEGER) AS codloja " +
-    "from tabela_pontuacao vpf " +
-    "where np = $1 GROUP BY CAST(vpf.codloja AS INTEGER); ";
+    "from vs_pwb_fpontuacao vpf " +
+    "where np = $1 GROUP BY CAST(vpf.codloja AS INTEGER), codloja";
   console.log("************** buscaNp ********************");
   console.log(sqlBuscaNp);
 
   try {
-    let rs = await pg.execute(sqlBuscaNp, [numero_np]);
-    if (rs.rowCount > 0) {
-      let sqlLoja =
-        "SELECT l.descricao_loja FROM lojas l WHERE l.id_loja_venda = $1";
-      let rsx = await pg.execute(sqlLoja, [rs.rows[0].codloja]);
-      let descricao_loja = rsx.rows[0].descricao_loja;
+    console.log('**************** entrou no try ********************************');
+    let rs = await pg_jmonte_prod.execute(sqlBuscaNp, [numero_np]);
+    console.log(rs.rows.length);
+
+    if (rs.rows.length > 0) {
+      console.log('**************** entrou em pg_jmonte_prod *************');
+
+      // Itera sobre cada registro e busca a descrição da loja
+      const lista_nps = await Promise.all(rs.rows.map(async (row) => {
+        let sqlLoja = "SELECT l.loja FROM vs_pwb_dlojas l WHERE l.codloja = $1";
+        let rsx = await pg_jmonte_prod.execute(sqlLoja, [row.codloja]);
+        let descricao_loja = rsx.rows[0]?.loja || 'Loja não encontrada'; // Garante que sempre haverá uma string
+
+        return {
+          ...row,
+          descricao_loja: descricao_loja,  // Adiciona a descrição da loja ao registro
+          numero_np: numero_np             // Adiciona o número np ao registro
+        };
+      }));
 
       const response = {
-        vlr_total: rs.rows[0].vlr_total,
-        vlr_pp: rs.rows[0].vlr_pp,
-        data_np: rs.rows[0].data_np,
-        id_loja: rs.rows[0].codloja,
-        descricao_loja: descricao_loja,
+        lista_nps: lista_nps
       };
+
       res.status(200).send(response);
     } else {
-      res.status(204).send("Nao encontrado");
+      res.status(204).send("Não encontrado");
     }
   } catch (error) {
     console.log(error);
     return res.status(404).send({ error: error, mensagem: "Erro ao procurar" });
   }
 };
+
+
 exports.listarPedidos = async (req, res) => {
   const pathImagem = "/anexos";
   let sqlPedidos =
