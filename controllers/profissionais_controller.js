@@ -1,5 +1,6 @@
 const pg = require("../conexao_prof_jmonte");
 const pg_jmonte_prod = require("../conexao_jmonte_prod");
+const pg_proj_jmonte = require("../conexao_prof_jmonte");
 const moment = require("moment");
 
 exports.inativarUsuario = async (req, res) => {
@@ -229,16 +230,19 @@ exports.buscaNp = async (req, res) => {
 
       // Itera sobre cada registro e busca a descrição da loja
       const lista_nps = await Promise.all(rs.rows.map(async (row) => {
-        let sqlLoja = "SELECT l.loja FROM vs_pwb_dlojas l WHERE l.codloja = $1";
-        let rsx = await pg_jmonte_prod.execute(sqlLoja, [row.codloja]);
-        let descricao_loja = rsx.rows[0]?.loja || 'Loja não encontrada'; // Garante que sempre haverá uma string
-
+        // Converte row.codloja para inteiro
+        let codlojaInt = parseInt(row.codloja, 10); // Converte para inteiro base 10
+        
+        let sqlLoja = "SELECT l.descricao_loja FROM lojas l WHERE l.id_loja_venda = $1";
+        let rsx = await pg_proj_jmonte.execute(sqlLoja, [codlojaInt]);
+        let descricao_loja = rsx.rows[0]?.descricao_loja || 'Loja não encontrada'; // Garante que sempre haverá uma string
+    
         return {
-          ...row,
-          descricao_loja: descricao_loja,  // Adiciona a descrição da loja ao registro
-          numero_np: numero_np             // Adiciona o número np ao registro
+            ...row,
+            descricao_loja: descricao_loja,  // Adiciona a descrição da loja ao registro
+            numero_np: numero_np             // Adiciona o número np ao registro
         };
-      }));
+    }));
 
       const response = {
         lista_nps: lista_nps

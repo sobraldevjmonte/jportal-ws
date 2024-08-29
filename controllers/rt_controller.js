@@ -1,4 +1,5 @@
 const pg = require("../conexao");
+const pg_proj_jmonte = require("../conexao_prof_jmonte");
 const moment = require("moment");
 
 //******************** mes/ano  *************************/
@@ -443,18 +444,18 @@ exports.atualizaTotalPreVendas = async (req, res) => {
 };
 
 exports.listaLojas = async (req, res) => {
+  console.log("************ listaLojas(inicio)****************")
   const sqlLListaLojas =
     "SELECT " +
-    "DISTINCT(p.cod_loja_pre), d.loja as descricao, d.codloja " +
+    "     l.id_loja_venda as id_loja, l.descricao_loja as descricao " +
     "FROM " +
-    "   fprevendas p " +
-    "JOIN dlojas d ON " +
-    "   p.cod_loja_pre  = CAST(d.codloja AS INTEGER) " +
-    "ORDER BY d.loja";
+    "     lojas l " +
+    "ORDER BY l.descricao_loja";
 
     console.log(sqlLListaLojas)
+    console.log('********************** sqlLListaLojas *********************')
   try {
-    let rs = await pg.execute(sqlLListaLojas);
+    let rs = await pg_proj_jmonte.execute(sqlLListaLojas);
     const response = {
       lojas: rs.rows,
     };

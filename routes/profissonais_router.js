@@ -11,10 +11,11 @@ router.get("/profissionais/listar-usuarios", ProfissionaisController.listarUsuar
 router.put("/profissionais/ativar-usuario/:id", ProfissionaisController.ativarUsuario);
 router.delete("/profissionais/excluir-usuario/:id", ProfissionaisController.excluirUsuario);
 router.put("/profissionais/inativar-usuario/:id", ProfissionaisController.inativarUsuario);
-router.put("/profissionais/salvar-np/:id_np", ProfissionaisController.salvarNp);
-router.get("/profissionais/buscar-np/:numero_np", ProfissionaisController.buscaNp);
 router.put("/profissionais/aprovar-np/:id_vendas/:id_usuario/:pontos_venda", ProfissionaisController.aprovarNp);
 router.put("/profissionais/rejeitar-np/:id_vendas", ProfissionaisController.rejeitarNp);
+
+router.put("/profissionais/salvar-np/:id_np", ProfissionaisController.salvarNp);
+router.get("/profissionais/buscar-np/:numero_np", ProfissionaisController.buscaNp);
 
 //********************* PREMIOS CADASTRO *************************/
 router.get("/profissionais/premios-listar", ProfissionaisController.premiosListar);
