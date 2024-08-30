@@ -175,11 +175,11 @@ exports.salvarNp = async (req, res) => {
   let formattedDate = date.format("YYYY-MM-DD");
 
   console.log(total_pontos);
-  console.log('data_np: ' + data_np);
-  console.log(valor_np);
-  console.log(numero_np);
+  console.log('data_np foramtada: ' + formattedDate);
+  console.log('valor_np: ' + valor_np);
+  console.log('numero_np: ' + numero_np);
   console.log('id_loja: ' + id_loja);
-  console.log(id_np);
+  console.log('id_vendas: ' + id_np);
 
   let sqlUpdateNp =
     "UPDATE vendas SET total_pontos = $1, data_np = $2, valor = $3, numero_np = $4, id_loja = $5 WHERE id_vendas = $6";
@@ -218,12 +218,11 @@ exports.buscaNp = async (req, res) => {
     "from vs_pwb_fpontuacao vpf " +
     "where np = $1 GROUP BY CAST(vpf.codloja AS INTEGER), codloja";
   console.log("************** buscaNp ********************");
-  console.log(sqlBuscaNp);
 
   try {
     console.log('**************** entrou no try ********************************');
     let rs = await pg_jmonte_prod.execute(sqlBuscaNp, [numero_np]);
-    console.log(rs.rows.length);
+    console.log(rs.rows);
 
     if (rs.rows.length > 0) {
       console.log('**************** entrou em pg_jmonte_prod *************');
@@ -231,7 +230,9 @@ exports.buscaNp = async (req, res) => {
       // Itera sobre cada registro e busca a descrição da loja
       const lista_nps = await Promise.all(rs.rows.map(async (row) => {
         // Converte row.codloja para inteiro
-        let codlojaInt = parseInt(row.codloja, 10); // Converte para inteiro base 10
+        console.log('row.codloja antes de converter: ' + row.codloja)
+        let codlojaInt = parseInt(row.codloja); // Converte para inteiro base 10
+        console.log('row.codloja convertido: ' + codlojaInt)
         
         let sqlLoja = "SELECT l.descricao_loja FROM lojas l WHERE l.id_loja_venda = $1";
         let rsx = await pg_proj_jmonte.execute(sqlLoja, [codlojaInt]);
