@@ -373,6 +373,95 @@ exports.listaPreVendas = async (req, res) => {
     return res.status(404).send({ error: error, mensagem: "Erro ao procurar" });
   }
 };
+exports.listaPreVendasDoCliente = async (req, res) => {
+  let mes = req.params.mes;
+  let ano = req.params.ano;
+  let loja = req.params.loja;
+  let idCliente = req.params.idCliente;
+  // idCliente = '00000165'
+
+  let vazio = "";
+  let planoNaoEntra = "061";
+  let finalizado = "Finalizado";
+
+  console.log("************** LISTA PRE-VENDAS ****************");
+  console.log("mes(listaPreVendas): " + mes);
+  console.log("ano(listaPreVendas): " + ano);
+  console.log("loja(listaPreVendas): " + loja);
+
+
+  
+
+  let sqlListaPreVendas =
+    "SELECT " +
+    "   DISTINCT(PP.NP) AS NP, " +
+    "   ROW_NUMBER() OVER () AS key , " +
+    "   TO_CHAR(PP.DATA_PRE, 'DD/MM/YYYY') as data_pre, " +
+    "   PP.tabela, " +
+    "   round(SUM(pp.comissao) , 2) AS comissao, " +
+    "   round(SUM(pp.perc_ap) , 2) AS perc_ap, " +
+    "   round(SUM(pp.vlr_total) , 2) as ptotal, " +
+    "   round(SUM(pp.vlr_tabela), 2) as total_vlr_tabela, " +
+    "   round(((SUM(pp.vlr_lucro_bruto)/ SUM(pp.vlr_total))) * 100, 2) as total_lb_percentual, " +
+    "   round((SUM(pp.vlr_fator_financeiro)/ SUM(pp.vlr_total)) * 100 , 2) as vlr_fator_financeiro, " +
+    "   round(((SUM(pp.vlr_lucro_bruto) + SUM(pp.vlr_fator_financeiro))/ SUM(pp.vlr_total)) * 100 , 2) as vlr_lb_fator_financeiro, " +
+    "   round(((SUM(pp.vlr_tabela) - SUM(pp.vlr_total))/ SUM(pp.vlr_tabela)) * 100 , 2) as vlr_diff_tab, " +
+    "   round(SUM(pp.vlr_total -  pp.vlr_fator_financeiro ), 2) as total_vlr_base_pp_lista, " +
+    "   C.CLIENTE AS nome_cliente, " +
+    "   v.vendedor, " +
+    "   l.loja, " +
+    "   d.plano " +
+    "FROM  " +
+    "FPREVENDAS PP  " +
+    "   JOIN " +
+    "     dclientes c on " +
+    "       c.codcliente = pp.COD_CLIENTE_PRE " +
+    "   JOIN " +
+    "     dvendedores v ON " +
+    "       v.codvendedor = pp.cod_vendedor_pre " +
+    "   JOIN " +
+    "     dlojas l ON " +
+    "       pp.cod_loja_pre  = CAST(l.codloja  as INTEGER) " +
+    "   JOIN " +
+    "     dplanos d ON " +
+    "       pp.plano_pre = d.cod_plano " +
+    "WHERE " +
+    "  PP.PLANO_PRE != $3 " +
+    "AND   " +
+    "  PP.COD_CLIENTE_PRE != $2 " +
+    "AND  " +
+    "  PP.STATUS = $4 " +
+    "AND  " +
+    "  pp.COD_CLIENTE_PRE = $1 " +
+    "GROUP BY  " +
+    "   pp.np,pp.data_pre,pp.situacao,pp.cod_cliente_pre,pp.tabela,c.cliente,v.vendedor, l.loja, d.plano " +
+    "ORDER BY  " +
+    "  PP.np";
+    console.log(sqlListaPreVendas)
+  try {
+    const rsPreVendas = await pg.execute(sqlListaPreVendas, [
+      idCliente,
+      vazio,
+      planoNaoEntra,
+      finalizado
+    ]);
+    let linhas = rsPreVendas.rows.length;
+    //----------- varivais calculas -------
+    let total_vlr_base_pp_lista = [];
+    for (let i = 0; i < linhas; i++) {
+      total_vlr_base_pp_lista[i] = rsPreVendas.rows[i].total_vlr_tabela;
+    }
+    //----------- varivais calculas -------
+    const response = {
+      quantidade: rsPreVendas.rows.length,
+      prevendas: rsPreVendas.rows,
+    };
+    res.status(200).send(response);
+  } catch (error) {
+    console.log(error);
+    return res.status(404).send({ error: error, mensagem: "Erro ao procurar" });
+  }
+};
 
 //------------ ATUAL CATEGORIA ------------
 exports.listaProdutos = async (req, res) => {

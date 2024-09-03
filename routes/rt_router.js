@@ -9,6 +9,7 @@ router.get("/produtos/:prevenda", RtController.listaProdutos);
 router.get("/prevendas/:indicador/:periodo", RtController.atualizaTotalPreVendas);
 router.get("/prevendas/listarlojas", RtController.listaLojas);
 
+router.get("/prevendas-do-cliente/:idCliente", RtController.listaPreVendasDoCliente); // nnps do cliente em etapas
 //router.post("/", login.obrigatorio, ProdutoController.salvarProduto);
 
 
