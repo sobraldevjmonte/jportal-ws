@@ -154,7 +154,7 @@ exports.listaIndicadores = async (req, res) => {
   console.log("cliente: " + cliente);
   console.log("categProfissional: " + categProfissional);
 
-  console.log("************** ROTA INDICADORES ****************");
+  console.log("xxx ************** ROTA INDICADORES **************** xxx");
 
   /********************************************************/
   let vazio = "";
@@ -201,7 +201,7 @@ exports.listaIndicadores = async (req, res) => {
     "GROUP BY " +
     "   pp.cod_indica_pre, ind.indicador, ft.vl_atual, ind.perc_rep " +
     "ORDER BY " +
-    "   pp.cod_indica_pre LIMIT 5";
+    "   pp.cod_indica_pre";
 
   console.log(sqlListaIndicadores);
   /********************************************************/
@@ -240,6 +240,8 @@ exports.listaIndicadores = async (req, res) => {
           "fprevendas_totais " +
           "(periodo, cod_indica_pre, vl_original, vl_atual, pago ) " +
           "VALUES ($1, $2, $3, $4, $5)";
+          console.log('rt_controller line 243 ******************* sqlInsertValorTotal *************')
+          console.log(sqlInsertValorTotal)
         try {
           await pg.execute(sqlInsertValorTotal, [
             periodo,
