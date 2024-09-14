@@ -6,13 +6,13 @@ const ProfissionaisController = require("../controllers/profissionais_controller
 
 
 
-router.get("/profissionais/listar-pedidos", ProfissionaisController.listarPedidos);
+router.get("/profissionais/listar-pedidos/:mes/:ano/:loja", ProfissionaisController.listarPedidos);
 router.get("/profissionais/listar-usuarios", ProfissionaisController.listarUsuarios);
 router.put("/profissionais/ativar-usuario/:id", ProfissionaisController.ativarUsuario);
 router.delete("/profissionais/excluir-usuario/:id", ProfissionaisController.excluirUsuario);
 router.put("/profissionais/inativar-usuario/:id", ProfissionaisController.inativarUsuario);
 router.put("/profissionais/aprovar-np/:id_vendas/:id_usuario/:pontos_venda", ProfissionaisController.aprovarNp);
-router.put("/profissionais/rejeitar-np/:id_vendas", ProfissionaisController.rejeitarNp);
+router.put("/profissionais/rejeitar-np", ProfissionaisController.rejeitarNp);
 
 router.put("/profissionais/salvar-np/:id_np", ProfissionaisController.salvarNp);
 router.get("/profissionais/buscar-np/:numero_np", ProfissionaisController.buscaNp);

@@ -55,7 +55,7 @@ exports.excluirUsuario = async (req, res) => {
   console.log("encontrado: " + encontrado);
   if (encontrado > 0) {
     const response = {
-      msg: 'Não é possível excluir.',
+      msg: "Não é possível excluir.",
     };
     res.status(401).send(response);
   } else {
@@ -80,7 +80,7 @@ exports.excluirUsuario = async (req, res) => {
 
 exports.listarUsuarios = async (req, res) => {
   let sqlPedidos = "SELECT * FROM usuarios ORDER BY id_usuario";
-  console.log("************** listarPedidos ********************");
+  console.log("************** listaUsuarios ********************");
 
   try {
     let rs = await pg.execute(sqlPedidos);
@@ -99,13 +99,21 @@ exports.listarUsuarios = async (req, res) => {
 };
 
 exports.rejeitarNp = async (req, res) => {
-  let id_vendas = req.params.id_vendas;
+  let obj = req.body.obj; // Recebe o corpo da requisição
+  let id_vendas = obj.id;
+  let obs = obj.obs.toUpperCase(); 
+
+  console.log("dados recebidos");
+  console.log(obj);
+  console.log("dados recebidos");
+
   console.log(id_vendas);
-  let sqlUpdateNp = "UPDATE vendas SET status = 'R' WHERE id_vendas = $1";
+  let sqlUpdateNp =
+    "UPDATE vendas SET status = 'R', motivo_rejeicao = $1 WHERE id_vendas = $2";
 
   try {
     console.log("**************** linha 63 ************************");
-    let rs = await pg.execute(sqlUpdateNp, [id_vendas]);
+    let rs = await pg.execute(sqlUpdateNp, [obs, id_vendas]);
     console.log("+++++++++++++++++ xibiu **************++");
 
     if (rs.rowCount === 1) {
@@ -175,11 +183,11 @@ exports.salvarNp = async (req, res) => {
   let formattedDate = date.format("YYYY-MM-DD");
 
   console.log(total_pontos);
-  console.log('data_np foramtada: ' + formattedDate);
-  console.log('valor_np: ' + valor_np);
-  console.log('numero_np: ' + numero_np);
-  console.log('id_loja: ' + id_loja);
-  console.log('id_vendas: ' + id_np);
+  console.log("data_np foramtada: " + formattedDate);
+  console.log("valor_np: " + valor_np);
+  console.log("numero_np: " + numero_np);
+  console.log("id_loja: " + id_loja);
+  console.log("id_vendas: " + id_np);
 
   let sqlUpdateNp =
     "UPDATE vendas SET total_pontos = $1, data_np = $2, valor = $3, numero_np = $4, id_loja = $5 WHERE id_vendas = $6";
@@ -208,7 +216,6 @@ exports.salvarNp = async (req, res) => {
   }
 };
 
-
 exports.buscaNp = async (req, res) => {
   let numero_np = req.params.numero_np;
   let sqlBuscaNp =
@@ -220,33 +227,39 @@ exports.buscaNp = async (req, res) => {
   console.log("************** buscaNp ********************");
 
   try {
-    console.log('**************** entrou no try ********************************');
+    console.log(
+      "**************** entrou no try ********************************"
+    );
     let rs = await pg_jmonte_prod.execute(sqlBuscaNp, [numero_np]);
     console.log(rs.rows);
 
     if (rs.rows.length > 0) {
-      console.log('**************** entrou em pg_jmonte_prod *************');
+      console.log("**************** entrou em pg_jmonte_prod *************");
 
       // Itera sobre cada registro e busca a descrição da loja
-      const lista_nps = await Promise.all(rs.rows.map(async (row) => {
-        // Converte row.codloja para inteiro
-        console.log('row.codloja antes de converter: ' + row.codloja)
-        let codlojaInt = parseInt(row.codloja); // Converte para inteiro base 10
-        console.log('row.codloja convertido: ' + codlojaInt)
-        
-        let sqlLoja = "SELECT l.descricao_loja FROM lojas l WHERE l.id_loja_venda = $1";
-        let rsx = await pg_proj_jmonte.execute(sqlLoja, [codlojaInt]);
-        let descricao_loja = rsx.rows[0]?.descricao_loja || 'Loja não encontrada'; // Garante que sempre haverá uma string
-    
-        return {
+      const lista_nps = await Promise.all(
+        rs.rows.map(async (row) => {
+          // Converte row.codloja para inteiro
+          console.log("row.codloja antes de converter: " + row.codloja);
+          let codlojaInt = parseInt(row.codloja); // Converte para inteiro base 10
+          console.log("row.codloja convertido: " + codlojaInt);
+
+          let sqlLoja =
+            "SELECT l.descricao_loja FROM lojas l WHERE l.id_loja_venda = $1";
+          let rsx = await pg_proj_jmonte.execute(sqlLoja, [codlojaInt]);
+          let descricao_loja =
+            rsx.rows[0]?.descricao_loja || "Loja não encontrada"; // Garante que sempre haverá uma string
+
+          return {
             ...row,
-            descricao_loja: descricao_loja,  // Adiciona a descrição da loja ao registro
-            numero_np: numero_np             // Adiciona o número np ao registro
-        };
-    }));
+            descricao_loja: descricao_loja, // Adiciona a descrição da loja ao registro
+            numero_np: numero_np, // Adiciona o número np ao registro
+          };
+        })
+      );
 
       const response = {
-        lista_nps: lista_nps
+        lista_nps: lista_nps,
       };
 
       res.status(200).send(response);
@@ -259,8 +272,19 @@ exports.buscaNp = async (req, res) => {
   }
 };
 
-
 exports.listarPedidos = async (req, res) => {
+  console.log(
+    "************** listarPedidos(Profissionais) ********************"
+  );
+
+  let mes = req.params.mes;
+  let ano = req.params.ano;
+  let loja = req.params.loja;
+
+  console.log("mes(listaPreVendas): " + mes);
+  console.log("ano(listaPreVendas): " + ano);
+  console.log("loja(listaPreVendas): " + loja);
+
   const pathImagem = "/anexos";
   let sqlPedidos =
     "SELECT " +
@@ -288,12 +312,18 @@ exports.listarPedidos = async (req, res) => {
     "   left join usuarios u on " +
     "     v.id_usuario = u.id_usuario " +
     "   left join lojas l on " +
-    "     v.id_loja = l.id_loja_venda ORDER BY v.id_vendas DESC";
-  console.log("************** listarPedidos ********************");
+    "     v.id_loja = l.id_loja_venda " +
+    "WHERE " +
+    "    ( ($1 = 0 AND $2 = 0) OR " +
+    "    (EXTRACT(MONTH FROM v.data_venda) = $1 AND EXTRACT(YEAR FROM v.data_venda) = $2)) " +
+    "AND " +
+    " $3 = 0 OR l.id_loja_venda = $3 ";
+  ("ORDER BY v.id_vendas DESC");
+
   console.log(sqlPedidos);
 
   try {
-    let rs = await pg.execute(sqlPedidos);
+    let rs = await pg.execute(sqlPedidos, [mes, ano, loja]);
     let countPedidos = rs.rows.length;
 
     // Adicionar o caminho completo da imagem a cada registro
@@ -349,7 +379,7 @@ exports.premiosListar = async (req, res) => {
 exports.atualizarImagem = async (req, res) => {
   let dados = req.body;
 
-  console.log(dados)
+  console.log(dados);
 
   let id_brinde = dados.id_brinde;
   let descricao = dados.descricao.toUpperCase();
@@ -364,7 +394,7 @@ exports.atualizarImagem = async (req, res) => {
     "UPDATE brindes " +
     "SET descricao = $1, pontos = $2, valor = $3, quantidade = $4, ativo = $5 , codigo = $6 " +
     "WHERE id_brinde = $7";
-    console.log('xxxxxxxxxxxxxxxxxxxxxxx')
+  console.log("xxxxxxxxxxxxxxxxxxxxxxx");
   try {
     let rs = await pg.execute(updateBrinde, [
       descricao,
@@ -373,10 +403,10 @@ exports.atualizarImagem = async (req, res) => {
       quantidade,
       ativo,
       codigo,
-      id_brinde
+      id_brinde,
     ]);
-    console.log('xxxxxxxxxxxxxxxxxxxxxxx')
-    console.log(rs)
+    console.log("xxxxxxxxxxxxxxxxxxxxxxx");
+    console.log(rs);
     const response = {
       mensagem: "Imagem do brinde atualizado!",
     };
@@ -415,7 +445,6 @@ exports.excluirBrinde = async (req, res) => {
   let rsVerifica = await pg.execute(sqlVerificaMovimento, [id_brinde]);
   let regVerifica = rsVerifica.rows.length;
   if (regVerifica > 0) {
-
     const response = {
       mensagem: `Não é possível excluir! Existem ${regVerifica} registros relacionados a esse brinde.`,
       quantidade: regVerifica,
