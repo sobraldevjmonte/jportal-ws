@@ -136,7 +136,8 @@ exports.listaVendedoresPorLoja = async (req, res) => {
   let idLoja = req.params.idLoja;
   let ordem = req.params.ordem;
   console.log("idLoja---------> " + idLoja);
-  console.log("------------------------------------------- ordem ----------------------------------------" +
+  console.log(
+    "------------------------------------------- ordem ----------------------------------------" +
       ordem
   );
   let ativo = "S";
@@ -156,7 +157,7 @@ exports.listaVendedoresPorLoja = async (req, res) => {
     "AND " +
     '     u."idLoja" = $2 ' +
     "AND " +
-    "     u.ativo = $1 " 
+    "     u.ativo = $1 ";
 
   // console.log(sqlListaVendedores);
   /********************************************************/
@@ -175,6 +176,42 @@ exports.listaVendedoresPorLoja = async (req, res) => {
     return res.status(500).send({ error: error, mensagem: "Erro ao procurar" });
   }
 };
+exports.clienteObra = async (req, res) => {
+  console.log("************* definir cliente como obra *************");
+  let idCliente = req.params.idCliente;
+  let sqlConsultaStatusAtual =
+    "SELECT * FROM clientes_obras a WHERE id_cliente = $1";
+
+  try {
+    let novoStatus = "S";
+
+    let rsStatusAtualObra = await pg.execute(sqlConsultaStatusAtual, [
+      idCliente,
+    ]);
+
+    if (rsStatusAtualObra.rows.length > 0) {
+      let statusAtual = rsStatusAtualObra.rows[0].status;
+      if (statusAtual === "S") {
+        novoStatus = null;
+      }
+      let atualizaStatus =
+        "UPDATE clientes_obras SET status = $1 WHERE id_cliente = $2";
+      pg.execute(atualizaStatus, [novoStatus, idCliente]);
+
+      res.status(200).send("Atualizado com sucesso.");
+    } else {
+      let sqlInserirNovo =
+        "INSERT INTO clientes_obras (id_cliente, status) VALUES ($1, $2)";
+      pg.execute(sqlInserirNovo, [idCliente, novoStatus]);
+      res.status(200).send("Cadastrado com sucesso.");
+    }
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .send({ error: error, mensagem: "Falha na atualização" });
+  }
+};
 exports.listaVendasVendedores = async (req, res) => {
   console.log("------------------ listaVendasVendedores ---------------------");
   let idVendedor = req.params.idVendedor;
@@ -191,6 +228,7 @@ exports.listaVendasVendedores = async (req, res) => {
 
   let sqlListaPendenciasEtapasVendedores =
     "select " +
+    "   co.status as cliente_obra, " +
     "   v.idvendedor || '' || v.idcliente as seq, " +
     '   v."totalGeraPendenteCadaCliente" as totalCliente, ' +
     "   v.idcliente as idCliente, " +
@@ -215,6 +253,8 @@ exports.listaVendasVendedores = async (req, res) => {
     "   join lojas l on " +
     '     u."idLoja"  = l."idLoja" ' +
     "     and u.ativo = $2 " +
+    "   left join clientes_obras co on " +
+    "   v.idcliente = co.id_cliente " +
     "WHERE " +
     "     v.idvendedor = $1 " +
     `ORDER BY v."totalGeraPendenteCadaCliente" ${ordem}`;

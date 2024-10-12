@@ -12,6 +12,9 @@ router.get("/etapas/lista-soma-etapas-por-vendedor/:idVendedor", EtapasControlle
 router.get("/etapas/lista-contatos-feitos/:idCliente", EtapasController.listaContatosFeitosParaCliente);
 router.post("/etapas/salvar-obervacao", EtapasController.salvarObervacao);
 
+//****************** setar como obral ******************/
+router.get("/etapas/cliente-obra/:idCliente", EtapasController.clienteObra);
+
 //********************** GERENTE  ********************/
 router.get("/etapas/lista-vendedores-por-loja/:idLoja/:ordem", EtapasController.listaVendedoresPorLoja);
 router.get("/etapas/lista-soma-etapas-por-loja/:idLoja", EtapasController.listaSomaEtapasPorLoja);
