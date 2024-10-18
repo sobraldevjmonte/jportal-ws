@@ -55,13 +55,12 @@ exports.buscarDadosEntregas = async (req, res) => {
         pp,
         complemento,
         tipoentrega,
-        cliente,
+        replace(cliente, '''',''),
         vendedor,
         fone,
         celular
       FROM vs_pwb_fprevendas x 
-      WHERE x.data_pre >= CURRENT_DATE - 1
-    `);
+      WHERE x.data_pre >= CURRENT_DATE - 15 and cod_loja_pre is not null`);
     
     const rows = resProd.rows;
     console.log('tamanho: ' + rows.length);
@@ -87,8 +86,7 @@ exports.buscarDadosEntregas = async (req, res) => {
       for (const row of rows) {
         // Verificar se a np já existe na tabela de destino
         const npExistsQuery = `
-          SELECT COUNT(*) FROM entregas_contatos WHERE np = '${row.np}'
-        `;
+          SELECT COUNT(*) FROM entregas_contatos WHERE np = '${row.np}' and cod_loja_pre = '${row.cod_loja_pre}'`;
         const existsRes = await pg.execute(npExistsQuery);
         
         if (existsRes.rows[0].count > 0) {
