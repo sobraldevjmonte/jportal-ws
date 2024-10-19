@@ -60,7 +60,7 @@ exports.buscarDadosEntregas = async (req, res) => {
         fone,
         celular
       FROM vs_pwb_fprevendas x 
-      WHERE x.data_pre >= CURRENT_DATE - 15 and cod_loja_pre is not null`);
+      WHERE x.data_compromisso >= CURRENT_DATE - 30 and cod_loja_pre is not null`);
     
     const rows = resProd.rows;
     console.log('tamanho: ' + rows.length);
@@ -198,7 +198,7 @@ exports.listarEntregasContatosVendedor = async (req, res) => {
     "     ec.cod_loja_pre, ec.np, ec.data_compromisso, ec.data_pre, " +
     "     ec.cod_cliente_pre, ec.cod_vendedor_pre, ec.status,ec.cliente, ec.vendedor,	ec.fone,	ec.celular,	ec.tipoentrega  " +
     "ORDER BY " +
-    "   ec.np DESC";
+    "   ec.data_compromisso ";
   //'LIMIT 5';
   console.log(sqlEntregasContatos);
 
