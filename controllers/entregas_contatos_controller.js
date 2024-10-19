@@ -60,7 +60,7 @@ exports.buscarDadosEntregas = async (req, res) => {
         fone,
         celular
       FROM vs_pwb_fprevendas x 
-      WHERE x.data_compromisso >= CURRENT_DATE - 30 and cod_loja_pre is not null`);
+      WHERE x.data_pre >= CURRENT_DATE - 30 and cod_loja_pre is not null`);
     
     const rows = resProd.rows;
     console.log('tamanho: ' + rows.length);
@@ -83,6 +83,7 @@ exports.buscarDadosEntregas = async (req, res) => {
         cliente, vendedor, fone, celular
       `;
 
+      let xxx = 0;
       for (const row of rows) {
         // Verificar se a np já existe na tabela de destino
         const npExistsQuery = `
@@ -110,9 +111,13 @@ exports.buscarDadosEntregas = async (req, res) => {
             }).join(", ")}
           );
         `;
+        
 
+        console.log(insertQuery);
         // Executar a inserção
+        console.log('sequencia: ' + xxx)
         await pg.execute(insertQuery);
+        xxx++;
       }
     }
 
@@ -198,7 +203,7 @@ exports.listarEntregasContatosVendedor = async (req, res) => {
     "     ec.cod_loja_pre, ec.np, ec.data_compromisso, ec.data_pre, " +
     "     ec.cod_cliente_pre, ec.cod_vendedor_pre, ec.status,ec.cliente, ec.vendedor,	ec.fone,	ec.celular,	ec.tipoentrega  " +
     "ORDER BY " +
-    "   ec.data_compromisso ";
+    "   ec.np DESC";
   //'LIMIT 5';
   console.log(sqlEntregasContatos);
 
