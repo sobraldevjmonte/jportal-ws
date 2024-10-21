@@ -61,7 +61,7 @@ exports.buscarDadosEntregas = async (req, res) => {
         fone,
         celular
       FROM vs_pwb_fprevendas x 
-      WHERE data_compromisso >= CURRENT_DATE - INTERVAL '5 days' AND data_compromisso < CURRENT_DATE - INTERVAL '1 day'
+      WHERE data_compromisso >= CURRENT_DATE - INTERVAL '30 days' AND data_compromisso < CURRENT_DATE - INTERVAL '1 day'
   AND codloja IS NOT NULL`);
 
     const rows = resProd.rows;
