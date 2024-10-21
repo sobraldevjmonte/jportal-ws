@@ -207,11 +207,11 @@ exports.listarEntregasContatosVendedor = async (req, res) => {
     "   ec.cod_cliente_pre, ec.cod_vendedor_pre, ec.status, ec.cliente, " +
     "   ec.vendedor, ec.fone, ec.celular, ec.tipoentrega " +
     "ORDER BY " +
-    "   ec.data_compromisso";
+    "   ec.data_compromisso DESC";
 
   //'LIMIT 5';
   console.log(sqlEntregasContatos);
-
+ 
   try {
     let rs = await pg.execute(sqlEntregasContatos, [idVendedor]);
     let countEntregas = rs.rows.length;
