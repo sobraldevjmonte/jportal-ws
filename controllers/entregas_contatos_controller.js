@@ -18,6 +18,7 @@ exports.buscarDadosEntregas = async (req, res) => {
     const resProd = await pgProd.execute(`
       SELECT 
         cod_loja_pre,
+        CAST(codloja AS INTEGER) AS codloja,
         np,
         data_pre,
         data_fat,
@@ -61,7 +62,7 @@ exports.buscarDadosEntregas = async (req, res) => {
         celular
       FROM vs_pwb_fprevendas x 
       WHERE data_compromisso >= CURRENT_DATE - INTERVAL '5 days' AND data_compromisso < CURRENT_DATE - INTERVAL '1 day'
-  AND cod_loja_pre IS NOT NULL`);
+  AND codloja IS NOT NULL`);
 
     const rows = resProd.rows;
     console.log("tamanho: " + rows.length);
@@ -72,7 +73,7 @@ exports.buscarDadosEntregas = async (req, res) => {
 
       // Obtenha os nomes das colunas da tabela de destino
       const columnNames = `
-        cod_loja_pre, np, data_pre, data_fat, data_compromisso, 
+        cod_loja_pre, codloja, np, data_pre, data_fat, data_compromisso, 
         cod_cliente_pre, cod_vendedor_pre, cod_fornecedor_pre, 
         cod_grupo_pre, cod_produto_pre, cod_familia, perc_ap, 
         comissao, cod_bar_pre, situacao, tabela, plano_pre, 
@@ -88,7 +89,7 @@ exports.buscarDadosEntregas = async (req, res) => {
       for (const row of rows) {
         // Verificar se a np já existe na tabela de destino
         const npExistsQuery = `
-          SELECT COUNT(*) FROM entregas_contatos WHERE np = '${row.np}' and cod_loja_pre = '${row.cod_loja_pre}'`;
+          SELECT COUNT(*) FROM entregas_contatos WHERE np = '${row.np}' and codloja = '${row.codloja}'`;
         const existsRes = await pg.execute(npExistsQuery);
 
         if (existsRes.rows[0].count > 0) {
@@ -181,6 +182,7 @@ exports.listarEntregasContatosVendedor = async (req, res) => {
     "   MAX(ec.id) AS id, " +
     "   MAX(ecd.id) AS idDetalhe, " +
     "   ec.cod_loja_pre as codigoLoja, " +
+    "   ec.codloja , " +
     "   REPLACE(ec.np, ' ', '') AS np, " +
     "   TO_CHAR(ec.data_compromisso, 'DD/MM/YYYY') as dataCompromisso, " +
     "   TO_CHAR(ec.data_pre, 'DD/MM/YYYY') as dataPreVenda, " +
@@ -207,7 +209,7 @@ exports.listarEntregasContatosVendedor = async (req, res) => {
     "AND " +
     "   ec.data_compromisso < CURRENT_DATE - INTERVAL '1 day' " +
     "GROUP BY " +
-    "   ec.cod_loja_pre, ec.np, ec.data_compromisso, ec.data_pre, " +
+    "   ec.cod_loja_pre, ec.codloja, ec.np, ec.data_compromisso, ec.data_pre, " +
     "   ec.cod_cliente_pre, ec.cod_vendedor_pre, ec.status, ec.cliente, " +
     "   ec.vendedor, ec.fone, ec.celular, ec.tipoentrega " +
     "ORDER BY " +
@@ -240,12 +242,12 @@ exports.listaVendedoresDoGerente = async (req, res) => {
   let sqlListaVendedoresDoGerente =
     "select " +
     "   distinct(ec.cod_vendedor_pre) as codVendedor, " +
-    "   ec.cod_loja_pre , " +
+    "   ec.codloja , " +
     "   ec.vendedor " +
     "from " +
     "   entregas_contatos ec " +
     "where " +
-    "	  ec.cod_loja_pre = $1 " +
+    "	  ec.codloja = $1 " +
     "and " + 
     "    ec.status = 'Finalizado' " +
     "and " + 
@@ -281,6 +283,7 @@ exports.listarEntregasContatosGerente = async (req, res) => {
     "   MAX(ec.id) AS id, " +
     "   MAX(ecd.id) AS idDetalhe, " +
     "   ec.cod_loja_pre as codigoLoja, " +
+    "   ec.codloja , " +
     "   REPLACE(ec.np, ' ', '') AS np, " +
     "   TO_CHAR(ec.data_compromisso, 'DD/MM/YYYY') as dataCompromisso, " +
     "   TO_CHAR(ec.data_pre, 'DD/MM/YYYY') as dataPreVenda, " +
@@ -299,7 +302,7 @@ exports.listarEntregasContatosGerente = async (req, res) => {
     "LEFT JOIN entregas_contatos_detallhes ecd ON " +
     "   REPLACE(ec.np, ' ', '') = ecd.np " +
     "WHERE " +
-    "   ec.cod_loja_pre = $1 " +
+    "   ec.codloja = $1 " +
     "AND " +
     "   ec.status = 'Finalizado' " +
     "AND " +
@@ -307,7 +310,7 @@ exports.listarEntregasContatosGerente = async (req, res) => {
     "AND " +
     "   ec.data_compromisso < CURRENT_DATE - INTERVAL '1 day' " +
     "GROUP BY " +
-    "   ec.cod_loja_pre, ec.np, ec.data_compromisso, ec.data_pre, " +
+    "   ec.cod_loja_pre, ec.codloja, ec.np, ec.data_compromisso, ec.data_pre, " +
     "   ec.cod_cliente_pre, ec.cod_vendedor_pre, ec.status, ec.cliente, " +
     "   ec.vendedor, ec.fone, ec.celular, ec.tipoentrega " +
     "ORDER BY " +
