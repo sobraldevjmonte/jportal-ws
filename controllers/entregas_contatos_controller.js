@@ -15,10 +15,12 @@ exports.buscarDadosEntregas = async (req, res) => {
 
   try {
     // 1. Consultar dados do banco X, convertendo datas para o formato adequado
-    const resProd = await pgProd.execute(`
+    const resProd = await pgProd.execute(
+      `
       SELECT 
         cod_loja_pre,
-        CAST(codloja AS INTEGER) AS codloja,
+        --CAST(codloja AS INTEGER) AS codloja,
+        codloja,
         np,
         data_pre,
         data_fat,
@@ -61,13 +63,14 @@ exports.buscarDadosEntregas = async (req, res) => {
         fone,
         celular
       FROM vs_pwb_fprevendas x 
-      WHERE data_compromisso >= CURRENT_DATE - INTERVAL '30 days' AND data_compromisso < CURRENT_DATE - INTERVAL '1 day'
-  AND codloja IS NOT NULL`);
+      WHERE data_compromisso >= CURRENT_DATE - INTERVAL '30 days' ` +
+        `--AND data_compromisso < CURRENT_DATE - INTERVAL '1 day' ` +
+        `AND codloja IS NOT NULL`
+    );
 
     const rows = resProd.rows;
     console.log("tamanho: " + rows.length);
 
-    // 2. Inserir dados no banco Y
     if (rows.length > 0) {
       console.log("************* inserindo *******************");
 
@@ -97,6 +100,30 @@ exports.buscarDadosEntregas = async (req, res) => {
           continue; // Pular a inserção se a np já existir
         }
 
+        // Função para sanitizar valores
+        const sanitizeValue = (value, index) => {
+          if (
+            value === null ||
+            value === "" ||
+            (typeof value === "string" && value.trim() === "")
+          ) {
+            return "NULL"; // Retorna NULL se o valor for vazio ou nulo
+          }
+
+          // Se for uma data, formata no estilo YYYY-MM-DD
+          if (index === 2 || index === 3 || index === 4 || index === 34) {
+            // data_pre, data_fat, data_compromisso, data_proximo
+            return `'${dayjs(value).format("YYYY-MM-DD")}'`;
+          }
+
+          // Remove aspas de valores numéricos e trata strings
+          if (typeof value === "number" || !isNaN(value)) {
+            return value;
+          } else {
+            return `'${String(value).replace(/'/g, "''")}'`; // Sanitize strings
+          }
+        };
+
         // Preparar a consulta de inserção
         const insertQuery = `
           INSERT INTO entregas_contatos (${columnNames}) VALUES (
@@ -106,12 +133,13 @@ exports.buscarDadosEntregas = async (req, res) => {
                 if (value === null) return "NULL";
 
                 // Se o valor é uma data, converta usando dayjs
-                if (index === 2 || index === 3 || index === 4 || index === 28) {
+                if (index === 3 || index === 4 || index === 5 || index === 32) {
                   // data_pre, data_fat, data_compromisso, data_proximo
                   return `'${dayjs(value).format("YYYY-MM-DD")}'`; // Formato adequado para o PostgreSQL
                 }
 
-                return `'${value}'`;
+                // Escapar strings para evitar problemas de SQL injection
+                return `'${String(value).replace(/'/g, "''")}'`;
               })
               .join(", ")}
           );
@@ -124,6 +152,64 @@ exports.buscarDadosEntregas = async (req, res) => {
         xxx++;
       }
     }
+
+    // 2. Inserir dados no banco Y
+    // if (rows.length > 0) {
+    //   console.log("************* inserindo *******************");
+
+    //   // Obtenha os nomes das colunas da tabela de destino
+    //   const columnNames = `
+    //     cod_loja_pre, codloja, np, data_pre, data_fat, data_compromisso,
+    //     cod_cliente_pre, cod_vendedor_pre, cod_fornecedor_pre,
+    //     cod_grupo_pre, cod_produto_pre, cod_familia, perc_ap,
+    //     comissao, cod_bar_pre, situacao, tabela, plano_pre,
+    //     status, quant, vlr_und, vlr_total, vlr_tabela,
+    //     vlr_custo, vlr_importo, vlr_desp_adm, vlr_fator_financeiro,
+    //     vlr_lucro, vlr_lucro_bruto, c_obs, cod_indica_pre,
+    //     obs_pos, data_proximo, foraestado, autorizacao,
+    //     prodpromo, pp, complemento, tipoentrega,
+    //     cliente, vendedor, fone, celular
+    //   `;
+
+    //   let xxx = 0;
+    //   for (const row of rows) {
+    //     // Verificar se a np já existe na tabela de destino
+    //     const npExistsQuery = `
+    //       SELECT COUNT(*) FROM entregas_contatos WHERE np = '${row.np}' and codloja = '${row.codloja}'`;
+    //     const existsRes = await pg.execute(npExistsQuery);
+
+    //     if (existsRes.rows[0].count > 0) {
+    //       console.log(`NP ${row.np} já existe. Ignorando inserção.`);
+    //       continue; // Pular a inserção se a np já existir
+    //     }
+
+    //     // Preparar a consulta de inserção
+    //     const insertQuery = `
+    //       INSERT INTO entregas_contatos (${columnNames}) VALUES (
+    //         ${Object.values(row)
+    //           .map((value, index) => {
+    //             // Verifica se o valor é nulo e trata de acordo
+    //             if (value === null) return "NULL";
+
+    //             // Se o valor é uma data, converta usando dayjs
+    //             if (index === 2 || index === 3 || index === 4 || index === 28) {
+    //               // data_pre, data_fat, data_compromisso, data_proximo
+    //               return `'${dayjs(value).format("YYYY-MM-DD")}'`; // Formato adequado para o PostgreSQL
+    //             }
+
+    //             return `'${value}'`;
+    //           })
+    //           .join(", ")}
+    //       );
+    //     `;
+
+    //     console.log(insertQuery);
+    //     // Executar a inserção
+    //     console.log("sequencia: " + xxx);
+    //     await pg.execute(insertQuery);
+    //     xxx++;
+    //   }
+    // }
 
     console.log("Transferência de dados concluída com sucesso!");
   } catch (error) {
@@ -237,8 +323,8 @@ exports.listaVendedoresDoGerente = async (req, res) => {
   console.log("******** listarEntregasContatosGerente *********");
 
   let idLoja = req.params.idLoja;
-  console.log('idLoja: ' + idLoja);
-  
+  console.log("idLoja: " + idLoja);
+
   let sqlListaVendedoresDoGerente =
     "select " +
     "   distinct(ec.cod_vendedor_pre) as codVendedor, " +
@@ -248,11 +334,11 @@ exports.listaVendedoresDoGerente = async (req, res) => {
     "   entregas_contatos ec " +
     "where " +
     "	  ec.codloja = $1 " +
-    "and " + 
+    "and " +
     "    ec.status = 'Finalizado' " +
-    "and " + 
+    "and " +
     "    ec.tipoentrega = 'LojaEntrega' " +
-    "and " + 
+    "and " +
     "    ec.data_compromisso <= CURRENT_DATE - interval '1 day' " +
     "order by ec.vendedor ";
   console.log(sqlListaVendedoresDoGerente);
@@ -271,7 +357,6 @@ exports.listaVendedoresDoGerente = async (req, res) => {
     return res.status(404).send({ error: error, mensagem: "Erro ao procurar" });
   }
 };
-
 
 exports.listarEntregasContatosGerente = async (req, res) => {
   console.log("******** listarEntregasContatosGerente *********");
