@@ -138,6 +138,8 @@ exports.buscarDadosEntregas = async (req, res) => {
                   return `'${dayjs(value).format("YYYY-MM-DD")}'`; // Formato adequado para o PostgreSQL
                 }
 
+                value = value.substring(0, 255).replace(/,/g, '');
+
                 // Escapar strings para evitar problemas de SQL injection
                 return `'${String(value).replace(/'/g, "''")}'`;
               })
