@@ -9,7 +9,7 @@ router.post("/entregas-contatos/salvar-obs-vendedor", entregasContatosController
 router.put("/entregas-contatos/alterar-obs-vendedor", entregasContatosController.alterarObsVendedor);
 
 //******************** gerente  **************/
-router.get("/entregas-contatos/lista-vendedores-do-gerente/:idLoja", entregasContatosController.listaVendedoresDoGerente);
+router.get("/entregas-contatos/lista-vendedores-do-gerente/:codigoLoja", entregasContatosController.listaVendedoresDoGerente);
 router.get("/entregas-contatos/lista-entregas-contatos-gerente/:idVendedor", entregasContatosController.listarEntregasContatosGerente);
 
 

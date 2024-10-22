@@ -63,7 +63,7 @@ exports.buscarDadosEntregas = async (req, res) => {
         fone,
         celular
       FROM vs_pwb_fprevendas x 
-      WHERE data_compromisso >= CURRENT_DATE - INTERVAL '30 days' ` +
+      WHERE data_compromisso >= CURRENT_DATE - INTERVAL '5 days' ` +
         `--AND data_compromisso < CURRENT_DATE - INTERVAL '1 day' ` +
         `AND codloja IS NOT NULL`
     );
@@ -322,8 +322,8 @@ exports.listarEntregasContatosVendedor = async (req, res) => {
 exports.listaVendedoresDoGerente = async (req, res) => {
   console.log("******** listarEntregasContatosGerente *********");
 
-  let idLoja = req.params.idLoja;
-  console.log("idLoja: " + idLoja);
+  let codigoLoja = req.params.codigoLoja;
+  console.log("idLoja: " + codigoLoja);
 
   let sqlListaVendedoresDoGerente =
     "select " +
@@ -344,7 +344,7 @@ exports.listaVendedoresDoGerente = async (req, res) => {
   console.log(sqlListaVendedoresDoGerente);
 
   try {
-    let rs = await pg.execute(sqlListaVendedoresDoGerente, [idLoja]);
+    let rs = await pg.execute(sqlListaVendedoresDoGerente, [codigoLoja]);
     let countVendedoresDoGerente = rs.rows.length;
 
     const response = {
@@ -361,8 +361,8 @@ exports.listaVendedoresDoGerente = async (req, res) => {
 exports.listarEntregasContatosGerente = async (req, res) => {
   console.log("******** listarEntregasContatosGerente *********");
 
-  let idLoja = req.params.idLoja;
-  console.log(idLoja);
+  let idVendedor = req.params.idVendedor;
+  console.log(idVendedor);
   let sqlEntregasContatosGerente =
     "SELECT " +
     "   MAX(ec.id) AS id, " +
@@ -405,7 +405,7 @@ exports.listarEntregasContatosGerente = async (req, res) => {
   console.log(sqlEntregasContatosGerente);
 
   try {
-    let rs = await pg.execute(sqlEntregasContatosGerente, [idLoja]);
+    let rs = await pg.execute(sqlEntregasContatosGerente, [idVendedor]);
     let countEntregasGerente = rs.rows.length;
 
     const response = {

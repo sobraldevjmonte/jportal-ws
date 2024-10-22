@@ -42,7 +42,8 @@ exports.login = async (req, res) => {
         idLoja: rs.rows[0].idLoja,
         nivelusuario: rs.rows[0].nivelusuario,
         idNivelUsuario: rs.rows[0].idNivelUsuario,
-        subNivel1: rs.rows[0].sub_nivel1
+        subNivel1: rs.rows[0].sub_nivel1,
+        icomp: rs.rows[0].icomp
       };
       return res.status(200).send(response);
     } else {
