@@ -231,8 +231,6 @@ exports.salvarObsVendedor = async (req, res) => {
     "INSERT INTO entregas_contatos_detallhes (status, obs, np, cod_loja_pre) VALUES ($1, $2, $3, $4) RETURNING *";
 
   const resultInsert = await pg.execute(sql, ["E", obs, np, codloja]);
-  console.log(resultInsert);
-
   const response = {
     mensagem: "Cadastrado com sucesso!",
     entrega_contato: {
@@ -319,6 +317,27 @@ exports.listarEntregasContatosVendedor = async (req, res) => {
   }
 };
 
+exports.listaLojasDoAdmin = async (req, res) => {
+  console.log("******** listaLojasDoAdmin *********");
+
+  let sqlListaLojasDoAdmin = 
+    `select l."idLoja", l."codigoLoja", l.icomp, l.fantasia from lojas l order by l."idLoja"`;
+  console.log(sqlListaLojasDoAdmin);
+
+  try {
+    let rs = await pg.execute(sqlListaLojasDoAdmin);
+    let countLojasDoAdmin = rs.rows.length;
+
+    const response = {
+      registros: countLojasDoAdmin,
+      lista_lojas: rs.rows,
+    };
+    res.status(200).send(response);
+  } catch (error) {
+    console.log(error);
+    return res.status(404).send({ error: error, mensagem: "Erro ao procurar" });
+  }
+}
 exports.listaVendedoresDoGerente = async (req, res) => {
   console.log("******** listarEntregasContatosGerente *********");
 

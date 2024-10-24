@@ -12,5 +12,7 @@ router.put("/entregas-contatos/alterar-obs-vendedor", entregasContatosController
 router.get("/entregas-contatos/lista-vendedores-do-gerente/:codigoLoja", entregasContatosController.listaVendedoresDoGerente);
 router.get("/entregas-contatos/lista-entregas-contatos-gerente/:idVendedor", entregasContatosController.listarEntregasContatosGerente);
 
+// ********************* admin ***************
+router.get("/entregas-contatos/lista-lojas-do-admin", entregasContatosController.listaLojasDoAdmin);
 
 module.exports = router;
