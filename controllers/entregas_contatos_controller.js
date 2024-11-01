@@ -260,12 +260,21 @@ exports.listarEntregasContatosVendedor = async (req, res) => {
   console.log("******** listarEntregasContatosVendedor *********");
 
   let idVendedor = req.params.idVendedor;
+  let codigLoja = req.params.codigLoja;
+  console.log("idVendedor: " + idVendedor)
+  console.log("codigLoja: " + codigLoja)
+
+  let sqlFiltro = "" 
+  if(codigLoja !=  'ALL'){
+    sqlFiltro = " AND ec.codloja = $2 " 
+  }
+
   console.log(idVendedor);
   let sqlEntregasContatos =
     "SELECT " +
     "   MAX(ec.id) AS id, " +
     "   MAX(ecd.id) AS idDetalhe, " +
-    "   ec.cod_loja_pre as codigoLoja, " +
+    "   ec.cod_loja_pre , " +
     "   ec.codloja , " +
     "   REPLACE(ec.np, ' ', '') AS np, " +
     "   TO_CHAR(ec.data_compromisso, 'DD/MM/YYYY') as dataCompromisso, " +
@@ -285,7 +294,7 @@ exports.listarEntregasContatosVendedor = async (req, res) => {
     "LEFT JOIN entregas_contatos_detallhes ecd ON " +
     "   REPLACE(ec.np, ' ', '') = ecd.np " +
     "WHERE " +
-    "   ec.cod_vendedor_pre = $1 " +
+    "   ec.cod_vendedor_pre = $1 " +  sqlFiltro +
     "AND " +
     "   ec.status = 'Finalizado' " +
     "AND " +
@@ -299,11 +308,14 @@ exports.listarEntregasContatosVendedor = async (req, res) => {
     "ORDER BY " +
     "   ec.data_compromisso DESC";
 
-  //'LIMIT 5';
   console.log(sqlEntregasContatos);
-
+  let rs;
   try {
-    let rs = await pg.execute(sqlEntregasContatos, [idVendedor]);
+    if(codigLoja != 'ALL'){
+      rs = await pg.execute(sqlEntregasContatos, [idVendedor, codigLoja]);
+    }else{
+      rs = await pg.execute(sqlEntregasContatos, [idVendedor]);
+    }
     let countEntregas = rs.rows.length;
 
     const response = {

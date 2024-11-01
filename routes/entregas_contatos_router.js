@@ -4,7 +4,7 @@ const entregasContatosController = require("../controllers/entregas_contatos_con
 
 
 //******************** vendedores  **************/
-router.get("/entregas-contatos/lista-entregas-contatos-vendedor/:idVendedor", entregasContatosController.listarEntregasContatosVendedor);
+router.get("/entregas-contatos/lista-entregas-contatos-vendedor/:codigLoja/:idVendedor", entregasContatosController.listarEntregasContatosVendedor);
 router.post("/entregas-contatos/salvar-obs-vendedor", entregasContatosController.salvarObsVendedor);
 router.put("/entregas-contatos/alterar-obs-vendedor", entregasContatosController.alterarObsVendedor);
 
