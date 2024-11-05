@@ -11,10 +11,12 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 exports.buscarDadosEntregas = async (req, res) => {
-  console.log("********** teste agenda scheduller **********");
+  console.log("**********  scheduller importar entragas_contatos **********");
 
   try {
     // 1. Consultar dados do banco X, convertendo datas para o formato adequado
+
+    let sqlImportaEntregas
     const resProd = await pgProd.execute(
       `
       SELECT 
@@ -63,7 +65,7 @@ exports.buscarDadosEntregas = async (req, res) => {
         fone,
         celular
       FROM vs_pwb_fprevendas x 
-      WHERE data_compromisso >= CURRENT_DATE - INTERVAL '15 days' ` +
+      WHERE data_compromisso >= CURRENT_DATE - INTERVAL '5 days' ` +
         `--AND data_compromisso < CURRENT_DATE - INTERVAL '1 day' ` +
         `AND codloja IS NOT NULL`
     );
@@ -152,64 +154,6 @@ exports.buscarDadosEntregas = async (req, res) => {
         xxx++;
       }
     }
-
-    // 2. Inserir dados no banco Y
-    // if (rows.length > 0) {
-    //   console.log("************* inserindo *******************");
-
-    //   // Obtenha os nomes das colunas da tabela de destino
-    //   const columnNames = `
-    //     cod_loja_pre, codloja, np, data_pre, data_fat, data_compromisso,
-    //     cod_cliente_pre, cod_vendedor_pre, cod_fornecedor_pre,
-    //     cod_grupo_pre, cod_produto_pre, cod_familia, perc_ap,
-    //     comissao, cod_bar_pre, situacao, tabela, plano_pre,
-    //     status, quant, vlr_und, vlr_total, vlr_tabela,
-    //     vlr_custo, vlr_importo, vlr_desp_adm, vlr_fator_financeiro,
-    //     vlr_lucro, vlr_lucro_bruto, c_obs, cod_indica_pre,
-    //     obs_pos, data_proximo, foraestado, autorizacao,
-    //     prodpromo, pp, complemento, tipoentrega,
-    //     cliente, vendedor, fone, celular
-    //   `;
-
-    //   let xxx = 0;
-    //   for (const row of rows) {
-    //     // Verificar se a np já existe na tabela de destino
-    //     const npExistsQuery = `
-    //       SELECT COUNT(*) FROM entregas_contatos WHERE np = '${row.np}' and codloja = '${row.codloja}'`;
-    //     const existsRes = await pg.execute(npExistsQuery);
-
-    //     if (existsRes.rows[0].count > 0) {
-    //       console.log(`NP ${row.np} já existe. Ignorando inserção.`);
-    //       continue; // Pular a inserção se a np já existir
-    //     }
-
-    //     // Preparar a consulta de inserção
-    //     const insertQuery = `
-    //       INSERT INTO entregas_contatos (${columnNames}) VALUES (
-    //         ${Object.values(row)
-    //           .map((value, index) => {
-    //             // Verifica se o valor é nulo e trata de acordo
-    //             if (value === null) return "NULL";
-
-    //             // Se o valor é uma data, converta usando dayjs
-    //             if (index === 2 || index === 3 || index === 4 || index === 28) {
-    //               // data_pre, data_fat, data_compromisso, data_proximo
-    //               return `'${dayjs(value).format("YYYY-MM-DD")}'`; // Formato adequado para o PostgreSQL
-    //             }
-
-    //             return `'${value}'`;
-    //           })
-    //           .join(", ")}
-    //       );
-    //     `;
-
-    //     console.log(insertQuery);
-    //     // Executar a inserção
-    //     console.log("sequencia: " + xxx);
-    //     await pg.execute(insertQuery);
-    //     xxx++;
-    //   }
-    // }
 
     console.log("Transferência de dados concluída com sucesso!");
   } catch (error) {
