@@ -20,7 +20,6 @@ const fonts = {
   },
 };
 
-// Instância do PdfPrinter
 const printer = new PdfPrinter(fonts);
 
 /**
