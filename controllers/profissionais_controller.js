@@ -278,7 +278,7 @@ exports.imprimirPedidosTodos = async (req, res) => {
   console.log(
     "************** listarTodosOsPedidos(Profissionais) ********************"
   );
-  
+
 
   let sqlPedidos =
     "SELECT " +
@@ -306,7 +306,7 @@ exports.imprimirPedidosTodos = async (req, res) => {
     "   left join usuarios u on " +
     "     v.id_usuario = u.id_usuario " +
     "   left join lojas l on " +
-    "     v.id_loja = l.id_loja_venda ";
+    "     v.id_loja = l.id_loja_venda  ORDER BY v.data_venda";
 
   try {
     let rs = await pg.execute(sqlPedidos);
@@ -376,7 +376,7 @@ exports.imprimirPedidos = async (req, res) => {
     "    ( ($1 = 0 AND $2 = 0) OR " +
     "    (EXTRACT(MONTH FROM v.data_venda) = $1 AND EXTRACT(YEAR FROM v.data_venda) = $2)) " +
     "AND " +
-    "   ($3 = 0 OR l.id_loja_venda = $3) ";
+    "   ($3 = 0 OR l.id_loja_venda = $3)  ORDER BY v.data_venda ";
 
   try {
     let rs = await pg.execute(sqlPedidos, [mes, ano, loja]);
