@@ -8,6 +8,7 @@ const ProfissionaisController = require("../controllers/profissionais_controller
 
 router.get("/profissionais/listar-pedidos/:mes/:ano/:loja", ProfissionaisController.listarPedidos);
 router.get("/profissionais/imprimir-pedidos/:mes/:ano/:loja", ProfissionaisController.imprimirPedidos);
+router.get("/profissionais/imprimir-todos-pedidos", ProfissionaisController.imprimirPedidosTodos);
 router.get("/profissionais/listar-usuarios", ProfissionaisController.listarUsuarios);
 router.put("/profissionais/ativar-usuario/:id", ProfissionaisController.ativarUsuario);
 router.delete("/profissionais/excluir-usuario/:id", ProfissionaisController.excluirUsuario);

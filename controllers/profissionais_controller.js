@@ -3,7 +3,7 @@ const pg_jmonte_prod = require("../conexao_jmonte_prod");
 const pg_proj_jmonte = require("../conexao_prof_jmonte");
 const moment = require("moment");
 
-const PDFDocument = require("pdfkit");
+const criarRelatorioPdfPedidosNp = require("./relatorio_pedidos_np");
 
 exports.inativarUsuario = async (req, res) => {
   let id = req.params.id;
@@ -274,6 +274,65 @@ exports.buscaNp = async (req, res) => {
   }
 };
 
+exports.imprimirPedidosTodos = async (req, res) => {
+  console.log(
+    "************** listarTodosOsPedidos(Profissionais) ********************"
+  );
+
+  let sqlPedidos =
+    "SELECT " +
+    "   v.id_vendas, " +
+    "   v.id_usuario, " +
+    "   v.numero_venda, " +
+    "   v.numero_np, " +
+    "   TO_CHAR(v.data_venda,'DD/MM/YYYY') as data_venda, " +
+    "   TO_CHAR(v.data_lancamento,'DD/MM/YYYY') as data_lancamento, " +
+    "   l.descricao_loja, " +
+    "   l.id_loja_venda as id_loja, " +
+    "   TO_CHAR(v.data_np,'DD/MM/YYYY') as data_np, " +
+    "   TO_CHAR(v.data_pagamento, 'DD/MM/YYYY') as data_pagamento," +
+    "   v.valor as valor_np, " +
+    "   u.nome as profissional, " +
+    "   v.status, " +
+    "   v.total_pontos, " +
+    "   v.imagem, " +
+    "   v.rejeicoes, " +
+    "   v.motivo_rejeicao, " +
+    "   v.premiado, " +
+    "   v.aberto " +
+    "FROM " +
+    "   vendas v " +
+    "   left join usuarios u on " +
+    "     v.id_usuario = u.id_usuario " +
+    "   left join lojas l on " +
+    "     v.id_loja = l.id_loja_venda ";
+
+  try {
+    let rs = await pg.execute(sqlPedidos);
+    let countPedidos = rs.rows.length;
+    const pedidos = rs.rows;
+    // console.log(pedidos)
+
+    if (pedidos.length === 0) {
+      return res.status(404).send({ mensagem: "Nenhum pedido encontrado" });
+    }
+
+    // Gera o documento PDF
+    const doc = criarRelatorioPdfPedidosNp(pedidos);
+
+    // Configura os cabeçalhos da resposta e envia o PDF
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=relatorio_pedidos.pdf"
+    );
+    doc.pipe(res); // Envia o documento diretamente na resposta
+    doc.end();
+  } catch (error) {
+    console.log(error);
+    return res.status(404).send({ error: error, mensagem: "Erro ao procurar" });
+  }
+};
 exports.imprimirPedidos = async (req, res) => {
   console.log(
     "************** listarPedidos(Profissionais) ********************"
@@ -322,84 +381,23 @@ exports.imprimirPedidos = async (req, res) => {
     let rs = await pg.execute(sqlPedidos, [mes, ano, loja]);
     let countPedidos = rs.rows.length;
     const pedidos = rs.rows;
+    console.log('countPedidos----------> ' + countPedidos)
 
     if (pedidos.length === 0) {
       return res.status(404).send({ mensagem: "Nenhum pedido encontrado" });
     }
 
-    // Iniciar criação do PDF
-    const doc = new PDFDocument();
+    // Gera o documento PDF
+    const doc = criarRelatorioPdfPedidosNp(pedidos);
 
-    // Configurar headers para o download do PDF
+    // Configura os cabeçalhos da resposta e envia o PDF
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename=pedidos_${mes}_${ano}.pdf`
+      "attachment; filename=relatorio_pedidos.pdf"
     );
-
-    // Enviar o PDF diretamente para o cliente
-    doc.pipe(res).on('error', (err) => {
-      console.log('Erro no pipe de PDF:', err);
-      res.status(500).send({ mensagem: 'Erro ao gerar o PDF' });
-    });
-
-    // Título do documento
-    doc
-      .fontSize(16)
-      .text(`Relatório de Pedidos - Loja ${loja} - ${mes}/${ano}`, {
-        align: "center",
-      });
-      doc.moveDown();
-      doc.fontSize(10).text(`Quantidade: ${pedidos.length}`);
-      doc.moveDown();
-  
-      const col1X = 50;
-      const col2X = 150;
-      const col3X = 300;
-      const col4X = 400;
-      let tableTopY = 150;
-  
-      
-      // Cabeçalho da tabela
-      doc.fontSize(10).text("Pedido", col1X, tableTopY);
-      doc.text("Parceiro", col2X, tableTopY);
-      doc.text("Data", col3X, tableTopY);
-      doc.text("Valor", col4X, tableTopY);
-  
-      // Desenhar linha inferior do cabeçalho
-      doc
-        .moveTo(col1X, tableTopY + 15)
-        .lineTo(col4X + 100, tableTopY + 15)
-        .stroke()
-        // .fill("red", "even-odd");
-
-      
-
-      let positionY = tableTopY + 22;
-      pedidos.forEach((pedido, index) => {
-        doc.fontSize(10).text(index + 1, col1X, positionY);
-        doc.text(pedido.profissional, col2X, positionY);
-        doc.text(pedido.data_venda, col3X, positionY);
-        doc.text(`R$ ${typeof pedido.valor_np === 'number' ? pedido.valor_np.toFixed(2) : 'N/A'}`, col4X, positionY);
-  
-        positionY += 20;
-        doc
-          .moveTo(col1X, positionY)
-          .lineTo(col4X + 100, positionY)
-          // .stroke()
-          // .fill("blue", "even-odd");
-  
-        positionY += 5;
-  
-        // Adicionar nova página se necessário
-        if (positionY > doc.page.height - 50) {
-          doc.addPage();
-          positionY = 50;
-        }
-      });
-  
-      // Finalizar o documento PDF após adicionar todos os pedidos
-      doc.end();
+    doc.pipe(res); // Envia o documento diretamente na resposta
+    doc.end();
   } catch (error) {
     console.log(error);
     return res.status(404).send({ error: error, mensagem: "Erro ao procurar" });
