@@ -34,6 +34,7 @@ function criarRelatorioPdfPedidosNp(pedidos) {
     [
       { text: "NP", style: "titulo_corpo" },
       { text: "DATA VENDA", style: "titulo_corpo" },
+      { text: "ST", style: "titulo_corpo" },
       { text: "VALOR NP", style: "titulo_corpo" },
       { text: "PROFISSIONAL", style: "titulo_corpo" },
     ],
@@ -43,6 +44,7 @@ function criarRelatorioPdfPedidosNp(pedidos) {
     body.push([
       { text: pedido.numero_np, style: "corpo" },
       { text: pedido.data_venda, style: "corpo" },
+      { text: pedido.status, style: "corpo" },
       {
         text: `R$ ${Number(pedido.valor_np).toLocaleString("pt-BR", {
           minimumFractionDigits: 2,
@@ -63,7 +65,7 @@ function criarRelatorioPdfPedidosNp(pedidos) {
       {
         table: {
           headerRows: 1,
-          widths: [50, 100, 100, '*'],
+          widths: [40, 50, 20,80, '*'],
           body,
         },
         margin: [0, 10],
