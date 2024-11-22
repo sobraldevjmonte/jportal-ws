@@ -4,8 +4,6 @@ const router = express.Router();
 const uploadImagens = require("../middlewares/upload_imagens_brindes");
 const ProfissionaisController = require("../controllers/profissionais_controller");
 
-
-
 router.get("/profissionais/listar-pedidos/:mes/:ano/:loja", ProfissionaisController.listarPedidos);
 router.get("/profissionais/imprimir-pedidos/:mes/:ano/:loja", ProfissionaisController.imprimirPedidos);
 router.get("/profissionais/imprimir-todos-pedidos", ProfissionaisController.imprimirPedidosTodos);

@@ -278,6 +278,7 @@ exports.imprimirPedidosTodos = async (req, res) => {
   console.log(
     "************** listarTodosOsPedidos(Profissionais) ********************"
   );
+  
 
   let sqlPedidos =
     "SELECT " +

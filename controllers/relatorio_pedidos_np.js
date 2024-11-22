@@ -31,7 +31,6 @@ function criarRelatorioPdfPedidosNp(pedidos) {
   let quantidade = 0
 
   const body = [
-    // Cabeçalho da tabela com o estilo aplicado
     [
       { text: "NP", style: "titulo_corpo" },
       { text: "DATA VENDA", style: "titulo_corpo" },

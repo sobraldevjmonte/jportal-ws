@@ -10,6 +10,7 @@ const timezone = require("dayjs/plugin/timezone");
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+
 exports.buscarDadosEntregas = async (req, res) => {
   console.log("**********  scheduller importar entragas_contatos **********");
 
