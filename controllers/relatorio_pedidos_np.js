@@ -54,11 +54,6 @@ function criarRelatorioPdfPedidosNp(pedidos) {
     ]);
     quantidade++
   });
-  // body.push([
-  //   { text: "Total de Registros", style: "corpo", colSpan: 3 },
-  //   {}, // Célula vazia para alinhamento
-  //   { text: pedidos.length, style: "corpo" }, // Exibe a quantidade de pedidos
-  // ])
 
   const docDefinition = {
     content: [
@@ -68,7 +63,7 @@ function criarRelatorioPdfPedidosNp(pedidos) {
       {
         table: {
           headerRows: 1,
-          widths: ["*", "*", "*", "*"],
+          widths: [50, 100, 100, '*'],
           body,
         },
         margin: [0, 10],
