@@ -11,48 +11,49 @@ exports.gerarPdfObras = async (req, res) => {
 
   let sqlPdfObras =
     "WITH ClientesUnicos AS ( " +
-    "SELECT  " +
-    "   v.idcliente, " +
-    "   v.nome_cliente, " +
-    "   co.status AS eh_obra, " +
-    '   u."idLoja", ' +
-    "   l.fantasia, " +
-    '   u."codigoVendedor", ' +
-    '   u."nomeUsuario", ' +
-    "   ROW_NUMBER() OVER ( " +
-    "       PARTITION BY v.idcliente  " +
-    '       ORDER BY v.nome_cliente, u."idLoja", l.fantasia ' +
-    "   ) AS rn " +
-    "FROM  " +
-    '    "vendasPendentesFinal" v ' +
-    "JOIN  " +
-    "    usuarios u  " +
-    '    ON v.idvendedor = u."codigoVendedor"  ' +
-    "    AND u.ativo = " +
-    "'S'" +
-    "JOIN  " +
-    "    lojas l  " +
-    '    ON u."idLoja" = l."idLoja" ' +
-    "LEFT JOIN  " +
-    "    clientes_obras co  " +
-    "    ON v.idcliente = co.id_cliente " +
-    "where  " +
-    "	co.status = " +
-    "'S')" +
-    "    SELECT  " +
-    "     idcliente, " +
-    "     nome_cliente, " +
-    "     eh_obra, " +
-    '     "idLoja", ' +
-    "     fantasia, " +
-    '     "codigoVendedor", ' +
-    '     "nomeUsuario" ' +
-    " FROM  " +
-    "     ClientesUnicos " +
-    " WHERE  " +
-    "     rn = 1 -- Seleciona apenas a primeira linha de cada cliente " +
-    " ORDER BY  " +
-    "     nome_cliente)";
+    "     SELECT  " +
+    "         v.idcliente, " +
+    "         v.nome_cliente, " +
+    "         co.status AS eh_obra, " +
+    '         u."idLoja", ' +
+    "         l.fantasia, " +
+    '         u."codigoVendedor", ' +
+    '         u."nomeUsuario", ' +
+    "         ROW_NUMBER() OVER ( " +
+    "             PARTITION BY v.idcliente  " +
+    '             ORDER BY v.nome_cliente, u."idLoja", l.fantasia ' +
+    "         ) AS rn " +
+    "     FROM  " +
+    '         "vendasPendentesFinal" v ' +
+    "     JOIN  " +
+    "         usuarios u  " +
+    '         ON v.idvendedor = u."codigoVendedor"  ' +
+    "         AND u.ativo = " +
+    "     'S'" +
+    "     JOIN  " +
+    "         lojas l  " +
+    '         ON u."idLoja" = l."idLoja" ' +
+    "     LEFT JOIN  " +
+    "         clientes_obras co  " +
+    "         ON v.idcliente = co.id_cliente " +
+    "     where  " +
+    "	      co.status = " +
+    "     'S')" +
+    "         SELECT  " +
+    "           idcliente, " +
+    "           nome_cliente, " +
+    "           eh_obra, " +
+    '           "idLoja", ' +
+    "           fantasia, " +
+    '           "codigoVendedor", ' +
+    '           "nomeUsuario" ' +
+    "       FROM  " +
+    "           ClientesUnicos " +
+    "       WHERE  " +
+    "           rn = 1 " +
+    "       ORDER BY  " +
+    "           nome_cliente";
+    console.log(sqlPdfObras)
 
   try {
     let rs = await pg.execute(sqlPdfObras);
