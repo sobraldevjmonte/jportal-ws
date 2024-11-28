@@ -32,23 +32,17 @@ function criarRelatorioPdfObras(pedidos) {
 
   const body = [
     [
-      { text: "ID CLIENTE", style: "titulo_corpo" },
       { text: "CLIENTE", style: "titulo_corpo" },
-      { text: "ID LOJA", style: "titulo_corpo" },
       { text: "LOJA", style: "titulo_corpo" },
-      { text: "COD. VEND.", style: "titulo_corpo" },
       { text: "VENDEDOR", style: "titulo_corpo" },
     ],
   ];
 
   pedidos.forEach((pedido) => {
     body.push([
-      { text: pedido.idcliente, style: "corpo" },
-      { text: pedido.nome_cliente, style: "corpo" },
-      { text: pedido.idLoja, style: "corpo" },
-      { text: pedido.fantasia, style: "corpo" },
-      { text: pedido.codigoVendedor, style: "corpo" },
-      { text: pedido.nomeUsuario, style: "corpo" },
+      { text: pedido.nome_cliente + " (" + pedido.idcliente + ")", style: "corpo" },
+      { text: pedido.fantasia + " (" + pedido.idLoja + ")", style: "corpo" },
+      { text: pedido.nomeUsuario + " (" + pedido.codigoVendedor + ")", style: "corpo" },
     ]);
     quantidade++;
   });
@@ -66,7 +60,7 @@ function criarRelatorioPdfObras(pedidos) {
       {
         table: {
           headerRows: 1,
-          widths: [60, 230, 30, 100, 60, "*"],
+          widths: [230, 150, "*"],
           body,
         },
         margin: [0, 10],
