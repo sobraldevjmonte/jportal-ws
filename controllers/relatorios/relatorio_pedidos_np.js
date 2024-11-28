@@ -99,6 +99,7 @@ function criarRelatorioPdfPedidosNp(pedidos) {
   };
 
   // Retorna o documento PDF
+  console.log("================================ chegou aqui documento PDF================================")
   return printer.createPdfKitDocument(docDefinition);
 }
 

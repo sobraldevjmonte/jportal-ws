@@ -1,6 +1,84 @@
 const pg = require("../conexao_jm");
 const moment = require("moment");
 
+const criarRelatorioPdfObras = require("./relatorios/relatorio_obras_etapas");
+
+exports.gerarPdfObras = async (req, res) => {
+  let idLoja = +req.params.idLoja;
+  let tipo = req.params.tipo;
+  let mes = +req.params.mes;
+  let ano = +req.params.ano;
+
+  let sqlPdfObras =
+    "WITH ClientesUnicos AS ( " +
+    "SELECT  " +
+    "   v.idcliente, " +
+    "   v.nome_cliente, " +
+    "   co.status AS eh_obra, " +
+    '   u."idLoja", ' +
+    "   l.fantasia, " +
+    '   u."codigoVendedor", ' +
+    '   u."nomeUsuario", ' +
+    "   ROW_NUMBER() OVER ( " +
+    "       PARTITION BY v.idcliente  " +
+    '       ORDER BY v.nome_cliente, u."idLoja", l.fantasia ' +
+    "   ) AS rn " +
+    "FROM  " +
+    '    "vendasPendentesFinal" v ' +
+    "JOIN  " +
+    "    usuarios u  " +
+    '    ON v.idvendedor = u."codigoVendedor"  ' +
+    "    AND u.ativo = " +
+    "'S'" +
+    "JOIN  " +
+    "    lojas l  " +
+    '    ON u."idLoja" = l."idLoja" ' +
+    "LEFT JOIN  " +
+    "    clientes_obras co  " +
+    "    ON v.idcliente = co.id_cliente " +
+    "where  " +
+    "	co.status = " +
+    "'S')" +
+    "    SELECT  " +
+    "     idcliente, " +
+    "     nome_cliente, " +
+    "     eh_obra, " +
+    '     "idLoja", ' +
+    "     fantasia, " +
+    '     "codigoVendedor", ' +
+    '     "nomeUsuario" ' +
+    " FROM  " +
+    "     ClientesUnicos " +
+    " WHERE  " +
+    "     rn = 1 -- Seleciona apenas a primeira linha de cada cliente " +
+    " ORDER BY  " +
+    "     nome_cliente)";
+
+  try {
+    let rs = await pg.execute(sqlPdfObras);
+    const pedidos = rs.rows;
+
+    if (pedidos.length === 0) {
+      return res.status(404).send({ mensagem: "Nenhum pedido encontrado" });
+    }
+
+    // Gera o documento PDF
+    const doc = criarRelatorioPdfObras(pedidos);
+
+    // Configura os cabeçalhos da resposta e envia o PDF
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=relatorio_pedidos.pdf"
+    );
+    doc.pipe(res); // Envia o documento diretamente na resposta
+    doc.end();
+  } catch (error) {
+    console.log(error);
+    return res.status(404).send({ error: error, mensagem: "Erro ao procurar" });
+  }
+};
+
 exports.listarClientes = async (req, res) => {
   console.log("------------- listarClientes(etapas) -------------------");
 
@@ -301,7 +379,9 @@ exports.listaContatosFeitosParaCliente = async (req, res) => {
   let idCliente = req.params.idCliente;
   console.log("idcliente: " + idCliente);
 
-  console.log("************** listaContatosFeitosParaCliente xxx ****************");
+  console.log(
+    "************** listaContatosFeitosParaCliente xxx ****************"
+  );
 
   /********************************************************/
   // let sqlCountVendedores =
@@ -314,7 +394,10 @@ exports.listaContatosFeitosParaCliente = async (req, res) => {
   //   '     c."idcliente" = $1 ' +
   //   "ORDER BY " +
   //   '     c."datacontato"';
-  let sqlCountVendedores = 'SELECT ' + " TO_CHAR(vp.dataPendencia,'DD/MM/YYYY') AS datacontato" + ' FROM "vendasPendentesPendencias" vp WHERE vp.idcliente = $1'
+  let sqlCountVendedores =
+    "SELECT " +
+    " TO_CHAR(vp.dataPendencia,'DD/MM/YYYY') AS datacontato" +
+    ' FROM "vendasPendentesPendencias" vp WHERE vp.idcliente = $1';
 
   console.log(sqlCountVendedores);
   /********************************************************/

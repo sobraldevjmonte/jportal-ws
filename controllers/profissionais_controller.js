@@ -3,7 +3,7 @@ const pg_jmonte_prod = require("../conexao_jmonte_prod");
 const pg_proj_jmonte = require("../conexao_prof_jmonte");
 const moment = require("moment");
 
-const criarRelatorioPdfPedidosNp = require("./relatorio_pedidos_np");
+const criarRelatorioPdfPedidosNp = require("./relatorios/relatorio_pedidos_np");
 
 exports.inativarUsuario = async (req, res) => {
   let id = req.params.id;
