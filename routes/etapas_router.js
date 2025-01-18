@@ -14,6 +14,7 @@ router.post("/etapas/salvar-obervacao", EtapasController.salvarObervacao);
 
 //*************** relatorios pdf  *************************/
 router.get("/etapas/gerar-pdf-obras/:tipo/:idLoja/:mes/:ano", EtapasController.gerarPdfObras);
+router.get("/etapas/etapas/gerar-pdf-obras-da-loja/:idLoja", EtapasController.gerarPdfObrasDaLoja);
 
 
 //****************** setar como obral ******************/

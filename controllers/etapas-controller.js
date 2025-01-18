@@ -3,6 +3,79 @@ const moment = require("moment");
 
 const criarRelatorioPdfObras = require("./relatorios/relatorio_obras_etapas");
 
+exports.gerarPdfObrasDaLoja = async (req, res) => {
+  let idLoja = +req.params.idLoja;
+
+  let sqlPdfObras =
+    "WITH ClientesUnicos AS ( " +
+    "     SELECT  " +
+    "         v.idcliente, " +
+    "         v.nome_cliente, " +
+    "         co.status AS eh_obra, " +
+    '         u."idLoja", ' +
+    "         l.fantasia, " +
+    '         u."codigoVendedor", ' +
+    '         u."nomeUsuario", ' +
+    "         ROW_NUMBER() OVER ( " +
+    "             PARTITION BY v.idcliente  " +
+    '             ORDER BY v.nome_cliente, u."idLoja", l.fantasia ' +
+    "         ) AS rn " +
+    "     FROM  " +
+    '         "vendasPendentesFinal" v ' +
+    "     JOIN  " +
+    "         usuarios u  " +
+    '         ON v.idvendedor = u."codigoVendedor"  ' +
+    "         AND u.ativo = " +
+    "     'S'" +
+    "     JOIN  " +
+    "         lojas l  " +
+    '         ON u."idLoja" = l."idLoja" ' +
+    "     LEFT JOIN  " +
+    "         clientes_obras co  " +
+    "         ON v.idcliente = co.id_cliente " +
+    "     where  " +
+    "	      co.status = " +
+    "     'S')" +
+    "         SELECT  " +
+    "           idcliente, " +
+    "           nome_cliente, " +
+    "           eh_obra, " +
+    '           "idLoja", ' +
+    "           fantasia, " +
+    '           "codigoVendedor", ' +
+    '           "nomeUsuario" ' +
+    "       FROM  " +
+    "           ClientesUnicos " +
+    "       WHERE  " +
+    "           rn = 1 " +
+    "       ORDER BY  " +
+    "           nome_cliente";
+  console.log(sqlPdfObras);
+
+  try {
+    let rs = await pg.execute(sqlPdfObras, [idLoja]);
+    const pedidos = rs.rows;
+
+    if (pedidos.length === 0) {
+      return res.status(404).send({ mensagem: "Nenhum pedido encontrado" });
+    }
+
+    // Gera o documento PDF
+    const doc = criarRelatorioPdfObras(pedidos);
+
+    // Configura os cabeçalhos da resposta e envia o PDF
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=relatorio_pedidos.pdf"
+    );
+    doc.pipe(res); // Envia o documento diretamente na resposta
+    doc.end();
+  } catch (error) {
+    console.log(error);
+    return res.status(404).send({ error: error, mensagem: "Erro ao procurar" });
+  }
+};
 exports.gerarPdfObras = async (req, res) => {
   let idLoja = +req.params.idLoja;
   let tipo = req.params.tipo;
@@ -53,7 +126,7 @@ exports.gerarPdfObras = async (req, res) => {
     "           rn = 1 " +
     "       ORDER BY  " +
     "           nome_cliente";
-    console.log(sqlPdfObras)
+  console.log(sqlPdfObras);
 
   try {
     let rs = await pg.execute(sqlPdfObras);

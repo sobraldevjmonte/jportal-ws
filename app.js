@@ -21,6 +21,9 @@ const rotaAnaliseNp = require("./routes/analise_np_router");
 const rotaProfissionais = require("./routes/profissonais_router");
 const rotaProfissionaisPedidos = require("./routes/profissonais_pedidos_router");
 const rotaEntregasContato = require("./routes/entregas_contatos_router");
+const rotaGruposSubGrupos = require("./routes/grupos-subgrupos");
+const rotaDashBoardVendedores = require("./routes/dashboard_vendedores_router");
+const rotaDashBoardGerentes = require("./routes/dashboard_gerentes_router");
 
 app.use(morgan("dev"));
 app.use(bodyParser.urlencoded({ extended: false })); //apenas dados simples
@@ -53,6 +56,9 @@ app.use("/rt/v1", rotaAnaliseNp);
 app.use("/rt/v1", rotaProfissionais);
 app.use("/rt/v1", rotaProfissionaisPedidos);
 app.use("/rt/v1", rotaEntregasContato);
+app.use("/rt/v1", rotaGruposSubGrupos);
+app.use("/rt/v1", rotaDashBoardVendedores);
+app.use("/rt/v1", rotaDashBoardGerentes);
 //----------- quando nao encontra a rota --------------
 app.use((req, res, next) => {
   const erro = new Error("Rota não encontrada!");
