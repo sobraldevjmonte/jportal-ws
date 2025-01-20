@@ -235,7 +235,9 @@ async function listaPorClienteGerenteUmDia(idloja, cod_cliente) {
         AND 
             ec.codloja = $1
         AND
-              ec.cod_cliente_pre  = $2
+            ec.cod_cliente_pre  = $2
+        AND
+            ec.cod_cliente_pre <> '00003404'
         AND 
             ec.data_pre  > CURRENT_DATE - INTERVAL '2 day'`;
 
@@ -262,6 +264,8 @@ async function listaPorClienteGerenteSemanaAnterior(idloja, cod_cliente) {
             ec.codloja = $1
         AND
               ec.cod_cliente_pre  = $2
+        AND
+            ec.cod_cliente_pre <> '00003404'
         AND 
             ec.data_pre BETWEEN 
               DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '7 days' 
@@ -290,6 +294,8 @@ async function listaPorClienteGerenteMesAnterior(idloja, cod_cliente) {
             ec.codloja = $1
         AND
               ec.cod_cliente_pre  = $2
+        AND
+            ec.cod_cliente_pre <> '00003404'
         AND 
             ec.data_pre >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
         AND 
@@ -317,7 +323,9 @@ async function listaPorClienteGerente180Dias(idloja, cod_cliente) {
         AND 
             ec.codloja = $1
         AND
-              ec.cod_cliente_pre  = $2
+            ec.cod_cliente_pre  = $2
+        AND
+            ec.cod_cliente_pre <> '00003404'
         AND 
             ec.data_pre BETWEEN CURRENT_DATE - INTERVAL '180 days' AND CURRENT_DATE`;
 
@@ -540,3 +548,73 @@ async function listaPorVendedorGerente180Dias(idloja, vendedor) {
     return { error: error, mensagem: "Erro ao procurar" };
   }
 }
+
+///gernte x indicador
+
+exports.listaDadosGerenteIndicadorLista = async (req, res) => {
+  console.log("******** listaDadosGeralVendedorIndicadorLista *********");
+
+  let idLoja = req.params.idLoja;
+
+  // Consulta para obter os indicadores e os valores totais
+  let sqlLista = `
+    SELECT 
+        ec.cod_indica_pre, 
+        SUM(ec.vlr_total) AS valortotal
+    FROM 
+        entregas_contatos ec
+    WHERE 
+        TRIM(ec.cod_indica_pre) <> '' 
+        AND 
+            ec.codloja = $1
+        AND 
+            ec.status = 'Pendente'
+        AND
+            ec.cod_cliente_pre <> '00003404'
+        AND 
+            ec.data_pre > CURRENT_DATE - INTERVAL '180 days'
+    GROUP BY 
+        ec.cod_indica_pre
+    ORDER BY 
+        valortotal DESC 
+    LIMIT $2`;
+
+  try {
+    let rs = await pg.execute(sqlLista, [idLoja, limiteRegistros]);
+
+    // Para cada indicador, buscar o nome associado
+    let listaResultados = [];
+    for (let i = 0; i < rs.rows.length; i++) {
+      let codIndica = rs.rows[i].cod_indica_pre;
+
+      // Consulta para obter o nome do indicador
+      let sqlInd = `SELECT SUBSTRING(i.indicador FROM 1 FOR 15) AS indicador
+                    FROM vs_pwb_dindicadores i 
+                    WHERE i.cod_indica = $1`;
+
+      let rsInd = await pg_jmonte_prod.execute(sqlInd, [codIndica]);
+
+      // Adicionar os dados ao resultado final
+      listaResultados.push({
+        cod_indica_pre: codIndica,
+        indicador: rsInd.rows.length > 0 ? rsInd.rows[0].indicador : null,
+        valorTotal: rs.rows[i].valortotal,
+      });
+    }
+
+    // Retornar os dados no formato esperado
+    const response = {
+      lista_indicadores_desc: listaResultados,
+    };
+
+    res.status(200).send(response);
+  } catch (error) {
+    console.error(
+      "Erro ao executar listaDadosGeralVendedorIndicadorLista:",
+      error
+    );
+    return res
+      .status(404)
+      .send({ error: error, mensagem: "Erro ao procurar os dados." });
+  }
+};
