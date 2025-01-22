@@ -25,5 +25,6 @@ router.get("/dashboard/lista-dashboard-gerente-vendedor-lista-detalhes/:idLoja/:
 
 // ---------------------- POR GERENTE X INDICADOR RANKING --------------------
 router.get("/dashboard/lista-dashboard-gerente-indicador-lista/:idLoja", DashboardGerente.listaDadosGerenteIndicadorLista);
+router.get("/dashboard/lista-dashboard-gerente-indicador-lista-detalhes/:idLoja/:indicador", DashboardGerente.listaDadosGerenteIndicadorListaDetalhe);
 
 module.exports = router; 

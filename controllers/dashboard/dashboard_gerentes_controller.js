@@ -618,3 +618,175 @@ exports.listaDadosGerenteIndicadorLista = async (req, res) => {
       .send({ error: error, mensagem: "Erro ao procurar os dados." });
   }
 };
+
+
+exports.listaDadosGerenteIndicadorListaDetalhe = async (req, res) => {
+  console.log("******** listaDadosGeralVendedorClienteListaDetalhe *********");
+
+  let results = [];
+  let indicador = req.params.indicador;
+  let idLoja = req.params.idLoja;
+
+  console.log(indicador, idLoja);
+
+  try {
+    // Obter detalhes para diferentes períodos
+    let detalhesUmDia = await listaPorIndicadorGerenteUmDia(idLoja, indicador);
+    let detalhesSemanaAnterior = await listaPorIndicadorGerenteSemanaAnterior(
+      idLoja,
+      indicador
+    );
+    let detalhesMesAnterior = await listaPorIndicadorGerenteMesAnterior(
+      idLoja,
+      indicador
+    );
+    let detalhes180Dias = await listaPorIndicadorGerente180Dias(
+      idLoja,
+      indicador
+    );
+
+    // Consolidar os detalhes no resultado
+    results.push({
+      indicador: indicador,
+      umDia: detalhesUmDia,
+      semanaAnterior: detalhesSemanaAnterior,
+      mesAnterior: detalhesMesAnterior,
+      centoOitentaDias: detalhes180Dias,
+    });
+
+    const response = {
+      lista_detalhes_indicadores: results,
+    };
+
+    console.log(response);
+    res.status(200).send(response);
+  } catch (err) {
+    console.error(`Erro ao buscar detalhes do cliente ${indicador}:`, err);
+    results.push({
+      ...rs.rows[i],
+      umDia: null,
+      semanaAnterior: null,
+      mesAnterior: null,
+      centoOitentaDias: null,
+    });
+  }
+};
+
+
+async function listaPorIndicadorGerenteUmDia(idLoja, indicador) {
+  console.log("******** listaPorIndicadorGerenteUmDia *********");
+
+  let sqlVendasPendentesDashVendedorGeralDiaAnterior = `select 
+          SUM(ec.vlr_total) AS acumulado  
+      FROM 
+          entregas_contatos ec WHERE ec.status = 'Pendente' 
+      AND 
+          ec.codloja = $1
+      AND
+          ec.cod_cliente_pre <> '00003404'
+      AND
+        TRIM(ec.cod_indica_pre) = $2
+      AND 
+          ec.data_pre  > CURRENT_DATE - INTERVAL '2 day'`;
+
+  let rs;
+  try {
+    rs = await pg.execute(sqlVendasPendentesDashVendedorGeralDiaAnterior, [
+      idLoja,
+      indicador,
+    ]);
+    return rs.rows[0].acumulado;
+  } catch (error) {
+    console.log(error);
+    return { error: error, mensagem: "Erro ao procurar" };
+  }
+}
+
+async function listaPorIndicadorGerenteSemanaAnterior(idLoja, indicador) {
+  console.log("******** listaPorIndicadorGerenteSemanaAnterior *********");
+  let sqlVendasPendentesDashVendedorGeralDiaAnterior = `select 
+          SUM(ec.vlr_total) AS acumulado  
+      FROM 
+          entregas_contatos ec where ec.status = 'Pendente' 
+      AND 
+          ec.codloja = $1
+      AND
+          ec.cod_cliente_pre <> '00003404'
+      AND
+          TRIM(ec.cod_indica_pre)  = $2
+      AND 
+          ec.data_pre BETWEEN 
+            DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '7 days' 
+            AND DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '1 day'`;
+
+  let rs;
+  try {
+    rs = await pg.execute(sqlVendasPendentesDashVendedorGeralDiaAnterior, [
+      idLoja,
+      indicador,
+    ]);
+    return rs.rows[0].acumulado;
+  } catch (error) {
+    console.log(error);
+    return { error: error, mensagem: "Erro ao procurar" };
+  }
+}
+
+async function listaPorIndicadorGerenteMesAnterior(idLoja, indicador) {
+  console.log("******** listaPorIndicadorGerenteMesAnterior *********");
+  let sqlVendasPendentesDashVendedorGeralDiaAnterior = `select 
+          SUM(ec.vlr_total) AS acumulado  
+      FROM 
+          entregas_contatos ec where ec.status = 'Pendente' 
+      AND 
+          ec.codloja = $1
+      AND
+          ec.cod_cliente_pre <> '00003404'
+      AND
+         TRIM(ec.cod_indica_pre)  = $2
+      AND 
+          ec.data_pre >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
+      AND 
+          ec.data_pre < DATE_TRUNC('month', CURRENT_DATE)`;
+
+  let rs;
+  try {
+    rs = await pg.execute(sqlVendasPendentesDashVendedorGeralDiaAnterior, [
+      idLoja,
+      indicador,
+    ]);
+    return rs.rows[0].acumulado;
+  } catch (error) {
+    console.log(error);
+    return { error: error, mensagem: "Erro ao procurar" };
+  }
+}
+
+async function listaPorIndicadorGerente180Dias(idLoja, cod_cliente) {
+  console.log("******** listaPorIndicadorGerente180Dias *********");
+  let sqlVendasPendentesDashVendedorGeralDiaAnterior = `select 
+          SUM(ec.vlr_total) AS acumulado  
+      FROM 
+          entregas_contatos ec where ec.status = 'Pendente' 
+      AND 
+          ec.codloja = $1
+      AND
+          ec.cod_cliente_pre <> '00003404'
+      AND
+          TRIM(ec.cod_indica_pre)  = $2
+      AND 
+          ec.data_pre BETWEEN CURRENT_DATE - INTERVAL '180 days' AND CURRENT_DATE`;
+
+  let rs;
+  console.log(sqlVendasPendentesDashVendedorGeralDiaAnterior);
+  try {
+    rs = await pg.execute(sqlVendasPendentesDashVendedorGeralDiaAnterior, [
+      idLoja,
+      cod_cliente,
+    ]);
+    return rs.rows[0].acumulado;
+  } catch (error) {
+    console.log(error);
+    return { error: error, mensagem: "Erro ao procurar" };
+  }
+}
