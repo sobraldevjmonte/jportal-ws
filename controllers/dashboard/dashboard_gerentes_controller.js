@@ -622,6 +622,8 @@ exports.listaDadosGerenteIndicadorLista = async (req, res) => {
 
 exports.listaDadosGerenteIndicadorListaDetalhe = async (req, res) => {
   console.log("******** listaDadosGeralVendedorClienteListaDetalhe *********");
+  console.log("******** listaDadosGeralVendedorClienteListaDetalhe *********");
+  console.log("******** listaDadosGeralVendedorClienteListaDetalhe *********");
 
   let results = [];
   let indicador = req.params.indicador;
