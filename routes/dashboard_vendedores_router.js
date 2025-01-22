@@ -19,6 +19,10 @@ router.get("/dashboard/lista-dashboard-vendedor-cliente-lista-detalhes/:vendedor
 router.get("/dashboard/lista-dashboard-vendedor-indicador-lista/:idVendedor", DashboardVendedor.listaDadosGeralVendedorIndicadorLista);
 router.get("/dashboard/lista-dashboard-vendedor-indicador-lista-detalhes/:vendedor/:indicador", DashboardVendedor.listaDadosGeralVendedorIndicadorListaDetalhe);
 
+//-------------------------- LSITA NP POR VENDEDOR -----------------------------
+// router.get("/dashboard/lista-dashboard-nps-vendedor-geral-um-dia/:idVendedor", DashboardVendedor.listaDadosGeralVendedorDiaAnterior);
+
+
 
 module.exports = router; 
 
