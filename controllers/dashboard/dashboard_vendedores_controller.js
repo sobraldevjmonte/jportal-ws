@@ -18,7 +18,6 @@ exports.listaDadosGeralVendedorSeisMeses = async (req, res) => {
       AND 
           ec.data_pre BETWEEN CURRENT_DATE - INTERVAL '180 days' AND CURRENT_DATE`;
 
-  console.log(sqlVendasPendentesDashVendedorGeralSeisMeses);
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralSeisMeses, [
@@ -51,7 +50,6 @@ exports.listaDadosGeralVendedorMesAnterior = async (req, res) => {
       AND 
           ec.data_pre < DATE_TRUNC('month', CURRENT_DATE)`;
 
-  console.log(sqlVendasPendentesDashVendedorGeralDiaAnterior);
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralDiaAnterior, [
@@ -83,7 +81,6 @@ exports.listaDadosGeralVendedorSemanaAnterior = async (req, res) => {
             DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '7 days' 
             AND DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '1 day'`;
 
-  console.log(sqlVendasPendentesDashVendedorGeralSemanaAnterior);
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralSemanaAnterior, [
@@ -92,6 +89,39 @@ exports.listaDadosGeralVendedorSemanaAnterior = async (req, res) => {
 
     const response = {
       lista_semana_anterior: rs.rows,
+    };
+    res.status(200).send(response);
+  } catch (error) {
+    console.log(error);
+    return res.status(404).send({ error: error, mensagem: "Erro ao procurar" });
+  }
+};
+exports.listaDadosGeralVendedorHoje = async (req, res) => {
+  console.log("******** listaDadosGeralVendedorHoje *********");
+
+  let codigoVendedor = req.params.idVendedor;
+
+  let sqlVendasPendentesDashVendedorGeralHoje = `SELECT 
+                                                  SUM(ec.vlr_total) AS acumuladohoje  
+                                              FROM 
+                                                  entregas_contatos ec 
+                                              WHERE 
+                                                  ec.status = 'Pendente' 
+                                                  AND ec.cod_cliente_pre <> '00003404'
+                                                  AND ec.cod_vendedor_pre = $1
+                                                  AND ec.data_pre = CURRENT_DATE
+                                              `;
+
+  console.log(sqlVendasPendentesDashVendedorGeralHoje);
+  let rs;
+  try {
+    rs = await pg.execute(sqlVendasPendentesDashVendedorGeralHoje, [
+      codigoVendedor,
+    ]);
+
+    console.log(rs)
+    const response = {
+      lista_hoje_vendedor: rs.rows,
     };
     res.status(200).send(response);
   } catch (error) {
@@ -113,7 +143,6 @@ exports.listaDadosGeralVendedorDiaAnterior = async (req, res) => {
       AND 
           ec.data_pre  > CURRENT_DATE - INTERVAL '2 day'`;
 
-  console.log(sqlVendasPendentesDashVendedorGeralDiaAnterior);
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralDiaAnterior, [
@@ -573,4 +602,3 @@ async function listaPorIndicador180Dias(vendedor, cod_cliente) {
     return { error: error, mensagem: "Erro ao procurar" };
   }
 }
-

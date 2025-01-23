@@ -15,19 +15,8 @@ cron.schedule("37 17 * * *", async () => {
 
 
 // // Agendar a cada 30 minutos
-// cron.schedule("*/30 * * * *", async () => {
-//   console.log("Agendador executando a cada 30 minutos...");
-//   try {
-//     await testeController.buscarDadosEntregas();
-//     console.log("Tarefa concluída com sucesso.");
-//   } catch (error) {
-//     console.error("Erro ao executar a tarefa agendada:", error);
-//   }
-// });
-
-// Agendar a cada hora
-cron.schedule("0 * * * *", async () => {
-  console.log("Agendador executando a cada hora...");
+cron.schedule("*/30 * * * *", async () => {
+  console.log("Agendador executando a cada 30 minutos...");
   try {
     await testeController.buscarDadosEntregas();
     console.log("Tarefa concluída com sucesso.");
@@ -35,6 +24,17 @@ cron.schedule("0 * * * *", async () => {
     console.error("Erro ao executar a tarefa agendada:", error);
   }
 });
+
+// Agendar a cada hora
+// cron.schedule("0 * * * *", async () => {
+//   console.log("Agendador executando a cada hora...");
+//   try {
+//     await testeController.buscarDadosEntregas();
+//     console.log("Tarefa concluída com sucesso.");
+//   } catch (error) {
+//     console.error("Erro ao executar a tarefa agendada:", error);
+//   }
+// });
 
 const bodyParser = require("body-parser");
 const rotaRT = require("./routes/rt_router");

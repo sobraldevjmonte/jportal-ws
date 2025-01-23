@@ -4,6 +4,7 @@ const DashboardVendedor = require("../controllers/dashboard/dashboard_vendedores
 
 
 //-------------------------- POR VENDEDEDOR GERAL --------------------------------
+router.get("/dashboard/lista-dashboard-vendedor-geral-hoje/:idVendedor", DashboardVendedor.listaDadosGeralVendedorHoje);
 router.get("/dashboard/lista-dashboard-vendedor-geral-um-dia/:idVendedor", DashboardVendedor.listaDadosGeralVendedorDiaAnterior);
 router.get("/dashboard/lista-dashboard-vendedor-geral-semana-anterior/:idVendedor", DashboardVendedor.listaDadosGeralVendedorSemanaAnterior);
 router.get("/dashboard/lista-dashboard-vendedor-geral-mes-anterior/:idVendedor", DashboardVendedor.listaDadosGeralVendedorMesAnterior);
