@@ -8,6 +8,7 @@ const DashboardGerente = require("../controllers/dashboard/dashboard_gerentes_co
 //******************************** gerentes *********************************/
 
 //-------------------------- POR GERENTE GERAL --------------------------------
+router.get("/dashboard/lista-dashboard-gerente-geral-hoje/:idLoja", DashboardGerente.listaDadosGeralGerenteHoje);
 router.get("/dashboard/lista-dashboard-gerente-geral-um-dia/:idLoja", DashboardGerente.listaDadosGeralGerenteDiaAnterior);
 router.get("/dashboard/lista-dashboard-gerente-geral-semana-anterior/:idLoja", DashboardGerente.listaDadosGeralGerenteSemanaAnterior);
 router.get("/dashboard/lista-dashboard-gerente-geral-mes-anterior/:idLoja", DashboardGerente.listaDadosGeralGerenteMesAnterior);

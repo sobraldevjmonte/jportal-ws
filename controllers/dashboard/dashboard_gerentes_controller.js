@@ -4,6 +4,37 @@ const moment = require("moment");
 
 const limiteRegistros = 5;
 
+exports.listaDadosGeralGerenteHoje = async (req, res) => {
+  console.log("******** listaDadosGeralGerenteHoje *********");
+
+  let idLoja = req.params.idLoja;
+  console.log(idLoja);
+  let sqlVendasPendentesDashVendedorGeralHoje = `SELECT 
+                                                  SUM(ec.vlr_total) AS acumuladohoje  
+                                              FROM 
+                                                  entregas_contatos ec 
+                                              WHERE 
+                                                  ec.status = 'Pendente' 
+                                                  AND ec.cod_cliente_pre <> '00003404'
+                                                  AND ec.codloja  = $1
+                                                  AND ec.data_pre = CURRENT_DATE`;
+
+  console.log(sqlVendasPendentesDashVendedorGeralHoje);
+  let rs;
+  try {
+    rs = await pg.execute(sqlVendasPendentesDashVendedorGeralHoje, [
+      idLoja,
+    ]);
+
+    const response = {
+      lista_um_hoje: rs.rows,
+    };
+    res.status(200).send(response);
+  } catch (error) {
+    console.log(error);
+    return res.status(404).send({ error: error, mensagem: "Erro ao procurar" });
+  }
+};
 exports.listaDadosGeralGerenteDiaAnterior = async (req, res) => {
   console.log("******** listaDadosGeralVendedorDiaAnterior *********");
 
@@ -18,7 +49,6 @@ exports.listaDadosGeralGerenteDiaAnterior = async (req, res) => {
         AND 
             ec.data_pre  > CURRENT_DATE - INTERVAL '2 day'`;
 
-  console.log(sqlVendasPendentesDashVendedorGeralDiaAnterior);
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralDiaAnterior, [
@@ -51,7 +81,6 @@ exports.listaDadosGeralGerenteSemanaAnterior = async (req, res) => {
               DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '7 days' 
               AND DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '1 day'`;
 
-  console.log(sqlVendasPendentesDashVendedorGeralSemanaAnterior);
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralSemanaAnterior, [
@@ -83,7 +112,6 @@ exports.listaDadosGeralGerenteMesAnterior = async (req, res) => {
         AND 
             ec.data_pre < DATE_TRUNC('month', CURRENT_DATE)`;
 
-  console.log(sqlVendasPendentesDashVendedorGeralDiaAnterior);
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralDiaAnterior, [
@@ -114,7 +142,6 @@ exports.listaDadosGeralGerenteSeisMeses = async (req, res) => {
         AND 
             ec.data_pre BETWEEN CURRENT_DATE - INTERVAL '180 days' AND CURRENT_DATE`;
 
-  console.log(sqlVendasPendentesDashVendedorGeralSeisMeses);
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralSeisMeses, [
