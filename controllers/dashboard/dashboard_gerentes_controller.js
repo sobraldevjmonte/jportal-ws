@@ -16,6 +16,7 @@ exports.listaDadosGeralGerenteHoje = async (req, res) => {
                                               WHERE 
                                                   ec.status = 'Pendente' 
                                                   AND ec.cod_cliente_pre <> '00003404'
+                                                  AND ec.cod_cliente_pre <> '7000407'
                                                   AND ec.codloja  = $1
                                                   AND ec.data_pre = CURRENT_DATE`;
 
@@ -43,9 +44,15 @@ exports.listaDadosGeralGerenteDiaAnterior = async (req, res) => {
   let sqlVendasPendentesDashVendedorGeralDiaAnterior = `select 
             SUM(ec.vlr_total) AS acumuladoUmDia  
         FROM 
-            entregas_contatos ec where ec.status = 'Pendente' 
+            entregas_contatos ec 
+        WHERE 
+              ec.status = 'Pendente' 
         AND 
              ec.codloja  = $1
+        AND 
+            ec.cod_cliente_pre <> '00003404'
+        AND 
+            ec.cod_cliente_pre <> '7000407'
         AND 
             ec.data_pre  > CURRENT_DATE - INTERVAL '2 day'`;
 
@@ -76,6 +83,10 @@ exports.listaDadosGeralGerenteSemanaAnterior = async (req, res) => {
             entregas_contatos ec where ec.status = 'Pendente' 
         AND 
             ec.codloja = $1
+        AND 
+            ec.cod_cliente_pre <> '00003404'
+        AND 
+            ec.cod_cliente_pre <> '7000407'
         AND 
             ec.data_pre BETWEEN 
               DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '7 days' 
@@ -108,6 +119,10 @@ exports.listaDadosGeralGerenteMesAnterior = async (req, res) => {
         AND 
              ec.codloja = $1
         AND 
+            ec.cod_cliente_pre <> '00003404'
+        AND 
+            ec.cod_cliente_pre <> '7000407'
+        AND 
             ec.data_pre >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
         AND 
             ec.data_pre < DATE_TRUNC('month', CURRENT_DATE)`;
@@ -139,6 +154,10 @@ exports.listaDadosGeralGerenteSeisMeses = async (req, res) => {
             entregas_contatos ec where ec.status = 'Pendente' 
         AND 
              ec.codloja = $1
+        AND 
+            ec.cod_cliente_pre <> '00003404'
+        AND 
+            ec.cod_cliente_pre <> '7000407'
         AND 
             ec.data_pre BETWEEN CURRENT_DATE - INTERVAL '180 days' AND CURRENT_DATE`;
 
@@ -174,8 +193,12 @@ exports.listaDadosGeralGerenteClienteLista = async (req, res) => {
                         entregas_contatos ec
                     WHERE 
                         ec.status = 'Pendente'
-                        AND ec.codloja = $1
-                        and ec.cod_cliente_pre <> '00003404'
+                        AND 
+                            ec.codloja = $1
+                        AND 
+                            ec.cod_cliente_pre <> '00003404'
+                        AND 
+                            ec.cod_cliente_pre <> '7000407'
                         AND ec.data_pre > CURRENT_DATE - INTERVAL '180 days'
                     GROUP BY 
                         ec.cod_cliente_pre, ec.cliente 
@@ -263,8 +286,6 @@ async function listaPorClienteGerenteUmDia(idloja, cod_cliente) {
             ec.codloja = $1
         AND
             ec.cod_cliente_pre  = $2
-        AND
-            ec.cod_cliente_pre <> '00003404'
         AND 
             ec.data_pre  > CURRENT_DATE - INTERVAL '2 day'`;
 
@@ -291,8 +312,6 @@ async function listaPorClienteGerenteSemanaAnterior(idloja, cod_cliente) {
             ec.codloja = $1
         AND
               ec.cod_cliente_pre  = $2
-        AND
-            ec.cod_cliente_pre <> '00003404'
         AND 
             ec.data_pre BETWEEN 
               DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '7 days' 
@@ -321,8 +340,6 @@ async function listaPorClienteGerenteMesAnterior(idloja, cod_cliente) {
             ec.codloja = $1
         AND
               ec.cod_cliente_pre  = $2
-        AND
-            ec.cod_cliente_pre <> '00003404'
         AND 
             ec.data_pre >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
         AND 
@@ -351,8 +368,6 @@ async function listaPorClienteGerente180Dias(idloja, cod_cliente) {
             ec.codloja = $1
         AND
             ec.cod_cliente_pre  = $2
-        AND
-            ec.cod_cliente_pre <> '00003404'
         AND 
             ec.data_pre BETWEEN CURRENT_DATE - INTERVAL '180 days' AND CURRENT_DATE`;
 
@@ -384,8 +399,12 @@ exports.listaDadosGeralGerenteVendedoresLista = async (req, res) => {
                         entregas_contatos ec
                     WHERE 
                         ec.status = 'Pendente'
-                        AND ec.codloja = $1
-                        and ec.cod_cliente_pre <> '00003404'
+                        AND 
+                            ec.codloja = $1
+                        AND 
+                            ec.cod_cliente_pre <> '00003404'
+                        AND 
+                            ec.cod_cliente_pre <> '7000407'
                         AND ec.data_pre > CURRENT_DATE - INTERVAL '180 days'
                     GROUP BY 
                         ec.cod_vendedor_pre, ec.vendedor
@@ -470,8 +489,10 @@ async function listaPorVendedorGerenteUmDia(idloja, vendedor) {
               ec.codloja = $1
           AND
               ec.cod_vendedor_pre  = $2
-          AND
-            ec.cod_cliente_pre <> '00003404'
+          AND 
+              ec.cod_cliente_pre <> '00003404'
+          AND 
+              ec.cod_cliente_pre <> '7000407'
           AND 
               ec.data_pre  > CURRENT_DATE - INTERVAL '2 day'`;
 
@@ -498,8 +519,10 @@ async function listaPorVendedorGerenteSemanaAnterior(idloja, vendedor) {
               ec.codloja = $1
           AND
               ec.cod_vendedor_pre  = $2
-          AND
-            ec.cod_cliente_pre <> '00003404'
+          AND 
+              ec.cod_cliente_pre <> '00003404'
+          AND 
+              ec.cod_cliente_pre <> '7000407'
           AND 
               ec.data_pre BETWEEN 
                 DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '7 days' 
@@ -528,8 +551,10 @@ async function listaPorVendedorGerenteMesAnterior(idloja, vendedor) {
               ec.codloja = $1
           AND
               ec.cod_vendedor_pre = $2
-          AND
+          AND 
             ec.cod_cliente_pre <> '00003404'
+          AND 
+              ec.cod_cliente_pre <> '7000407'
           AND 
               ec.data_pre >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
           AND 
@@ -558,8 +583,10 @@ async function listaPorVendedorGerente180Dias(idloja, vendedor) {
               ec.codloja = $1
           AND
               ec.cod_vendedor_pre  = $2
-        AND
-            ec.cod_cliente_pre <> '00003404'
+          AND 
+              ec.cod_cliente_pre <> '00003404'
+          AND 
+              ec.cod_cliente_pre <> '7000407'
           AND 
               ec.data_pre BETWEEN CURRENT_DATE - INTERVAL '180 days' AND CURRENT_DATE`;
 
@@ -596,8 +623,10 @@ exports.listaDadosGerenteIndicadorLista = async (req, res) => {
             ec.codloja = $1
         AND 
             ec.status = 'Pendente'
-        AND
+        AND 
             ec.cod_cliente_pre <> '00003404'
+          AND 
+              ec.cod_cliente_pre <> '7000407'
         AND 
             ec.data_pre > CURRENT_DATE - INTERVAL '180 days'
     GROUP BY 
@@ -711,8 +740,10 @@ async function listaPorIndicadorGerenteUmDia(idLoja, indicador) {
           entregas_contatos ec WHERE ec.status = 'Pendente' 
       AND 
           ec.codloja = $1
-      AND
-          ec.cod_cliente_pre <> '00003404'
+      AND 
+            ec.cod_cliente_pre <> '00003404'
+          AND 
+              ec.cod_cliente_pre <> '7000407'
       AND
         TRIM(ec.cod_indica_pre) = $2
       AND 
@@ -739,8 +770,10 @@ async function listaPorIndicadorGerenteSemanaAnterior(idLoja, indicador) {
           entregas_contatos ec where ec.status = 'Pendente' 
       AND 
           ec.codloja = $1
-      AND
-          ec.cod_cliente_pre <> '00003404'
+      AND 
+            ec.cod_cliente_pre <> '00003404'
+          AND 
+              ec.cod_cliente_pre <> '7000407'
       AND
           TRIM(ec.cod_indica_pre)  = $2
       AND 
@@ -769,8 +802,10 @@ async function listaPorIndicadorGerenteMesAnterior(idLoja, indicador) {
           entregas_contatos ec where ec.status = 'Pendente' 
       AND 
           ec.codloja = $1
-      AND
-          ec.cod_cliente_pre <> '00003404'
+      AND 
+            ec.cod_cliente_pre <> '00003404'
+          AND 
+              ec.cod_cliente_pre <> '7000407'
       AND
          TRIM(ec.cod_indica_pre)  = $2
       AND 
@@ -799,8 +834,10 @@ async function listaPorIndicadorGerente180Dias(idLoja, cod_cliente) {
           entregas_contatos ec where ec.status = 'Pendente' 
       AND 
           ec.codloja = $1
-      AND
-          ec.cod_cliente_pre <> '00003404'
+      AND 
+            ec.cod_cliente_pre <> '00003404'
+          AND 
+              ec.cod_cliente_pre <> '7000407'
       AND
           TRIM(ec.cod_indica_pre)  = $2
       AND 
