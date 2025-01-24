@@ -134,7 +134,7 @@ exports.listaDadosGeralVendedorHoje = async (req, res) => {
       codigoVendedor,
     ]);
 
-    console.log(rs)
+    console.log(rs);
     const response = {
       lista_hoje_vendedor: rs.rows,
     };
@@ -635,3 +635,49 @@ async function listaPorIndicador180Dias(vendedor, cod_cliente) {
     return { error: error, mensagem: "Erro ao procurar" };
   }
 }
+
+//// vendedor x clientes x nps
+
+exports.listaDadosVendedorClientesNps = async (req, res) => {
+  console.log("******** listaDadosVendedorClientesNps *********");
+
+  let codigoVendedor = req.params.idVendedor;
+  let idLoja = req.params.idLoja;
+  console.log(codigoVendedor, idLoja);
+
+  let sql = `SELECT 
+                ec.np,
+                ec.cliente ,
+                SUM(ec.vlr_total) AS acumulado
+            FROM 
+                entregas_contatos ec
+            WHERE 
+                ec.status = 'Pendente'
+            AND 
+                ec.codloja = $1
+            AND 
+                ec.cod_cliente_pre = $2
+            AND 
+                ec.cod_cliente_pre <> '00003404'
+            AND 
+                ec.cod_cliente_pre <> '7000407'
+            GROUP BY 
+                ec.np, ec.cliente
+            ORDER BY 
+                acumulado DESC`;
+  console.log(sql);
+  let rs;
+  try {
+    rs = await pg.execute(sql, [idLoja, codigoVendedor]);
+
+    console.log(rs.rows[0]);
+
+    const response = {
+      lista_nps_cliente: rs.rows,
+    };
+    res.status(200).send(response);
+  } catch (error) {
+    console.log(error);
+    return res.status(404).send({ error: error, mensagem: "Erro ao procurar" });
+  }
+};
