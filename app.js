@@ -7,7 +7,7 @@ const cron = require("node-cron");
 const testeController = require("./controllers/entregas_contatos_controller");
 
 // Defina a tarefa agendada para rodar às 14:30 todos os dias
-cron.schedule("37 17 * * *", async () => {
+cron.schedule("420 20 * * *", async () => {
   console.log("Agendador executando às 21:00 horas...");
   console.log("Agendador executando...");
   await testeController.buscarDadosEntregas();
@@ -15,15 +15,15 @@ cron.schedule("37 17 * * *", async () => {
 
 
 // // Agendar a cada 30 minutos
-cron.schedule("*/30 * * * *", async () => {
-  console.log("Agendador executando a cada 30 minutos...");
-  try {
-    await testeController.buscarDadosEntregas();
-    console.log("Tarefa concluída com sucesso.");
-  } catch (error) {
-    console.error("Erro ao executar a tarefa agendada:", error);
-  }
-});
+// cron.schedule("*/30 * * * *", async () => {
+//   console.log("Agendador executando a cada 30 minutos...");
+//   try {
+//     await testeController.buscarDadosEntregas();
+//     console.log("Tarefa concluída com sucesso.");
+//   } catch (error) {
+//     console.error("Erro ao executar a tarefa agendada:", error);
+//   }
+// });
 
 // Agendar a cada hora
 // cron.schedule("0 * * * *", async () => {

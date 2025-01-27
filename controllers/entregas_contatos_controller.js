@@ -66,13 +66,28 @@ exports.buscarDadosEntregas = async (req, res) => {
         fone,
         celular
       FROM vs_pwb_fprevendas x 
-      WHERE data_compromisso >= CURRENT_DATE - INTERVAL '5 days' ` +
+      WHERE data_compromisso >= CURRENT_DATE - INTERVAL '180 days' ` +
         `--AND data_compromisso < CURRENT_DATE - INTERVAL '1 day' ` +
         `AND codloja IS NOT NULL`
     );
 
+
     const rows = resProd.rows;
     console.log("tamanho: " + rows.length);
+
+    // const targetValue = "1493.330";
+
+    // // Verificar cada linha e campo
+    // for (const row of rows) {
+    //   for (const [key, value] of Object.entries(row)) {
+    //     if (String(value) === targetValue) {
+    //       console.log(
+    //         `Valor '${targetValue}' encontrado no campo '${key}' na linha:`,
+    //         row
+    //       );
+    //     }
+    //   }
+    // }
 
     if (rows.length > 0) {
       console.log("************* inserindo *******************");
@@ -95,7 +110,7 @@ exports.buscarDadosEntregas = async (req, res) => {
       for (const row of rows) {
         // Verificar se a np já existe na tabela de destino
         const npExistsQuery = `
-          SELECT COUNT(*) FROM entregas_contatos WHERE np = '${row.np}' and codloja = '${row.codloja}'`;
+          SELECT COUNT(*) FROM entregas_contatos WHERE np = '${row.np}' and codloja = '${row.codloja}' and vlr_total = '${row.vlr_total}'`;
         const existsRes = await pg.execute(npExistsQuery);
 
         if (existsRes.rows[0].count > 0) {
