@@ -641,9 +641,9 @@ async function listaPorIndicador180Dias(vendedor, cod_cliente) {
 exports.listaDadosVendedorClientesNps = async (req, res) => {
   console.log("******** listaDadosVendedorClientesNps *********");
 
-  let codigoVendedor = req.params.idVendedor;
+  let idCliente = req.params.idCliente;
   let idLoja = req.params.idLoja;
-  console.log(codigoVendedor, idLoja);
+  console.log(idCliente, idLoja);
 
   let sql = `SELECT 
                 ec.np,
@@ -668,7 +668,7 @@ exports.listaDadosVendedorClientesNps = async (req, res) => {
   console.log(sql);
   let rs;
   try {
-    rs = await pg.execute(sql, [idLoja, codigoVendedor]);
+    rs = await pg.execute(sql, [idLoja, idCliente]);
 
     console.log(rs.rows[0]);
 

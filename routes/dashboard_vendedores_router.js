@@ -21,7 +21,7 @@ router.get("/dashboard/lista-dashboard-vendedor-indicador-lista/:idVendedor", Da
 router.get("/dashboard/lista-dashboard-vendedor-indicador-lista-detalhes/:vendedor/:indicador", DashboardVendedor.listaDadosGeralVendedorIndicadorListaDetalhe);
 
 //-------------------------- LSITA NP POR VENDEDOR -----------------------------
-router.get("/dashboard/lista-dashboard-nps-vendedor-cliente/:idLoja/:idVendedor", DashboardVendedor.listaDadosVendedorClientesNps);
+router.get("/dashboard/lista-dashboard-nps-vendedor-cliente/:idLoja/:idCliente", DashboardVendedor.listaDadosVendedorClientesNps);
 
 
 
