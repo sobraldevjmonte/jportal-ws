@@ -642,8 +642,9 @@ exports.listaDadosVendedorClientesNps = async (req, res) => {
   console.log("******** listaDadosVendedorClientesNps *********");
 
   let idCliente = req.params.idCliente;
+  let idVendedor = req.params.idVendedor;
   let idLoja = req.params.idLoja;
-  console.log(idCliente, idLoja);
+  console.log(idCliente, idVendedor, idLoja);
 
   let sql = `SELECT 
                 ec.np,
@@ -657,12 +658,62 @@ exports.listaDadosVendedorClientesNps = async (req, res) => {
                 ec.codloja = $1
             AND 
                 ec.cod_cliente_pre = $2
+            AND
+              ec.cod_vendedor_pre = $3
             AND 
                 ec.cod_cliente_pre <> '00003404'
             AND 
                 ec.cod_cliente_pre <> '7000407'
             GROUP BY 
                 ec.np, ec.cliente
+            ORDER BY 
+                acumulado DESC`;
+  console.log(sql);
+  let rs;
+  try {
+    rs = await pg.execute(sql, [idLoja, idCliente, idVendedor]);
+
+    console.log(rs.rows[0]);
+
+    const response = {
+      lista_nps_cliente: rs.rows,
+    };
+    res.status(200).send(response);
+  } catch (error) {
+    console.log(error);
+    return res.status(404).send({ error: error, mensagem: "Erro ao procurar" });
+  }
+};
+
+
+//// gerente x clientes x nps
+
+exports.listaDadosGerenteClientesNps = async (req, res) => {
+  console.log("******** listaDadosVendedorClientesNps *********");
+
+  let idCliente = req.params.idCliente;
+  let idLoja = req.params.idLoja;
+  console.log(idCliente, idLoja);
+
+  let sql = `SELECT 
+                ec.np,
+                ec.cliente ,
+                SUM(ec.vlr_total) AS acumulado,
+                ec.vendedor 
+            FROM 
+                entregas_contatos ec
+            WHERE 
+                ec.status = 'Pendente'
+            AND 
+                ec.codloja = $1
+            AND 
+                ec.cod_cliente_pre = $2
+            AND 
+                ec.cod_cliente_pre <> '00003404'
+            AND 
+                ec.cod_cliente_pre <> '7000407'
+            GROUP BY 
+                ec.np, ec.cliente, ec.vendedor 
             ORDER BY 
                 acumulado DESC`;
   console.log(sql);
