@@ -469,9 +469,9 @@ exports.listaContatosFeitosParaCliente = async (req, res) => {
   //   "ORDER BY " +
   //   '     c."datacontato"';
   let sqlCountVendedores =
-    "SELECT " +
-    " TO_CHAR(vp.dataPendencia,'DD/MM/YYYY') AS datacontato" +
-    ' FROM "vendasPendentesPendencias" vp WHERE vp.idcliente = $1';
+    `SELECT 
+     TO_CHAR(vp."dataPendencia",'DD/MM/YYYY') AS datacontato
+     FROM "vendasPendentesPendencias" vp WHERE vp."idCliente" = $1`;
 
   console.log(sqlCountVendedores);
   /********************************************************/
