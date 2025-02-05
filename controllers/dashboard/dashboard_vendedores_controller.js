@@ -3,7 +3,9 @@ const pg = require("../../conexao_jm");
 const pg_jmonte_prod = require("../../conexao_jmonte_prod");
 const moment = require("moment");
 
-const limiteRegistros = 5;
+const limiteRegistros = 1000;
+const limiteValor = 100;
+
 exports.listaDadosGeralVendedorSeisMeses = async (req, res) => {
   console.log("******** listaDadosGeralVendedorSeisMeses *********");
 
@@ -192,7 +194,10 @@ exports.listaDadosGeralVendedorClienteLista = async (req, res) => {
                       entregas_contatos ec
                   WHERE 
                       ec.status = 'Pendente'
-                      AND ec.cod_vendedor_pre = $1
+                      AND 
+                        ec.cod_vendedor_pre = $1
+                      AND 
+                        ec.vlr_total > $3
                       AND 
                         ec.cod_cliente_pre <> '00003404'
                       AND 
@@ -205,7 +210,11 @@ exports.listaDadosGeralVendedorClienteLista = async (req, res) => {
                   LIMIT $2`;
 
   try {
-    let rs = await pg.execute(sqlLista, [codigoVendedor, limiteRegistros]);
+    let rs = await pg.execute(sqlLista, [
+      codigoVendedor,
+      limiteRegistros,
+      limiteValor,
+    ]);
     const response = {
       lista_clientes_desc: rs.rows,
     };
@@ -400,6 +409,8 @@ exports.listaDadosGeralVendedorIndicadorLista = async (req, res) => {
         TRIM(ec.cod_indica_pre) <> '' 
         AND ec.cod_vendedor_pre = $1
         AND ec.status = 'Pendente'
+         AND 
+          ec.vlr_total > $3
         AND 
           ec.cod_cliente_pre <> '00003404'
         AND 
@@ -412,7 +423,11 @@ exports.listaDadosGeralVendedorIndicadorLista = async (req, res) => {
     LIMIT $2`;
 
   try {
-    let rs = await pg.execute(sqlLista, [codigoVendedor, limiteRegistros]);
+    let rs = await pg.execute(sqlLista, [
+      codigoVendedor,
+      limiteRegistros,
+      limiteValor,
+    ]);
 
     // Para cada indicador, buscar o nome associado
     let listaResultados = [];
@@ -685,7 +700,6 @@ exports.listaDadosVendedorClientesNps = async (req, res) => {
   }
 };
 
-
 //// gerente x clientes x nps
 
 exports.listaDadosGerenteClientesNps = async (req, res) => {
@@ -720,6 +734,75 @@ exports.listaDadosGerenteClientesNps = async (req, res) => {
   let rs;
   try {
     rs = await pg.execute(sql, [idLoja, idCliente]);
+
+    console.log(rs.rows[0]);
+
+    const response = {
+      lista_nps_cliente: rs.rows,
+    };
+    res.status(200).send(response);
+  } catch (error) {
+    console.log(error);
+    return res.status(404).send({ error: error, mensagem: "Erro ao procurar" });
+  }
+};
+
+exports.listaDadosVendedorGeralNps = async (req, res) => {
+  console.log("******** listaDadosVendedorClientesNps *********");
+
+  let periodo = req.params.periodo;
+  let idVendedor = req.params.idVendedor;
+  let idLoja = req.params.idLoja;
+  console.log('periodo: ' + periodo, 'idVendedor: ' + idVendedor , 'idLoja' + idLoja);
+
+  let sqlSelecionado = "";
+  if ((periodo == "HOJE")) {
+    sqlSelecionado = " AND ec.data_pre = CURRENT_DATE ";
+  }
+  if ((periodo == "DIA ANT.")) {
+    sqlSelecionado = " AND ec.data_pre  > CURRENT_DATE - INTERVAL '2 day' ";
+  }
+  if ((periodo == "SEMANA ANT.")) {
+    sqlSelecionado = ` AND ec.data_pre BETWEEN 
+            DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '7 days' 
+            AND DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '1 day' `;
+  }
+  if ((periodo == "MÊS ANT.")) {
+    sqlSelecionado = ` AND 
+          ec.data_pre >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
+      AND 
+          ec.data_pre < DATE_TRUNC('month', CURRENT_DATE) `;
+  }
+  if ((periodo == "180 DIAS")) {
+    sqlSelecionado =
+      " AND  ec.data_pre BETWEEN CURRENT_DATE - INTERVAL '180 days' AND CURRENT_DATE ";
+  }
+
+  let sql = `SELECT 
+                ec.np,
+                SUBSTRING(ec.cliente FROM 1 FOR 15) AS cliente,
+                SUM(ec.vlr_total) AS acumulado
+            FROM 
+                entregas_contatos ec
+            WHERE 
+                ec.status = 'Pendente'
+            AND 
+                ec.codloja = $1
+            AND
+              ec.cod_vendedor_pre = $2
+            AND 
+                ec.cod_cliente_pre <> '00003404'
+            AND 
+                ec.cod_cliente_pre <> '7000407'
+            ${sqlSelecionado}
+            GROUP BY 
+                ec.np, ec.cliente
+            ORDER BY 
+                acumulado DESC`;
+  console.log(sql);
+  let rs;
+  try {
+    rs = await pg.execute(sql, [idLoja, idVendedor]);
 
     console.log(rs.rows[0]);
 

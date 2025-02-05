@@ -26,6 +26,9 @@ router.get("/dashboard/lista-dashboard-nps-vendedor-cliente/:idLoja/:idCliente/:
 //-------------------------- LSITA NP CLIENTES POR LOJA -----------------------------
 router.get("/dashboard/lista-dashboard-nps-gerente-cliente/:idLoja/:idCliente", DashboardVendedor.listaDadosGerenteClientesNps);
 
+//-------------------------- LSITA NP POR VENDEDOR GERAL-----------------------------
+router.get("/dashboard/lista-dashboard-nps-vendedor-nps-geral-hoje/:idLoja/:periodo/:idVendedor", DashboardVendedor.listaDadosVendedorGeralNps);
+
 
 
 

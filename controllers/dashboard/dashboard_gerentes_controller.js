@@ -2,7 +2,8 @@ const pg = require("../../conexao_jm");
 const pg_jmonte_prod = require("../../conexao_jmonte_prod");
 const moment = require("moment");
 
-const limiteRegistros = 5;
+const limiteRegistros = 1000;
+const limiteValor = 100;
 
 exports.listaDadosGeralGerenteHoje = async (req, res) => {
   console.log("******** listaDadosGeralGerenteHoje *********");
@@ -196,6 +197,8 @@ exports.listaDadosGeralGerenteClienteLista = async (req, res) => {
                         AND 
                             ec.codloja = $1
                         AND 
+                          ec.vlr_total > $3
+                        AND 
                             ec.cod_cliente_pre <> '00003404'
                         AND 
                             ec.cod_cliente_pre <> '7000407'
@@ -207,7 +210,7 @@ exports.listaDadosGeralGerenteClienteLista = async (req, res) => {
                     LIMIT $2`;
 
   try {
-    let rs = await pg.execute(sqlLista, [idLoja, limiteRegistros]);
+    let rs = await pg.execute(sqlLista, [idLoja, limiteRegistros, limiteValor]);
     const response = {
       lista_clientes_desc: rs.rows,
     };
@@ -402,6 +405,8 @@ exports.listaDadosGeralGerenteVendedoresLista = async (req, res) => {
                         AND 
                             ec.codloja = $1
                         AND 
+                          ec.vlr_total > $3
+                        AND 
                             ec.cod_cliente_pre <> '00003404'
                         AND 
                             ec.cod_cliente_pre <> '7000407'
@@ -413,7 +418,7 @@ exports.listaDadosGeralGerenteVendedoresLista = async (req, res) => {
                     LIMIT $2`;
 
   try {
-    let rs = await pg.execute(sqlLista, [idLoja, limiteRegistros]);
+    let rs = await pg.execute(sqlLista, [idLoja, limiteRegistros, limiteValor]);
     const response = {
       lista_vendedores_desc: rs.rows,
     };
@@ -856,3 +861,70 @@ async function listaPorIndicadorGerente180Dias(idLoja, cod_cliente) {
     return { error: error, mensagem: "Erro ao procurar" };
   }
 }
+
+
+exports.listaDadosGerenteGeralNps = async (req, res) => {
+  console.log("******** listaDadosVendedorClientesNps *********");
+
+  let periodo = req.params.periodo;
+  let idLoja = req.params.idLoja;
+  console.log('periodo: ' + periodo, 'idLoja: ' + idLoja);
+
+  let sqlSelecionado = "";
+  if ((periodo == "HOJE")) {
+    sqlSelecionado = " AND ec.data_pre = CURRENT_DATE ";
+  }
+  if ((periodo == "DIA ANT.")) {
+    sqlSelecionado = " AND ec.data_pre  > CURRENT_DATE - INTERVAL '2 day' ";
+  }
+  if ((periodo == "SEMANA ANT.")) {
+    sqlSelecionado = ` AND ec.data_pre BETWEEN 
+            DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '7 days' 
+            AND DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '1 day' `;
+  }
+  if ((periodo == "MÊS ANT.")) {
+    sqlSelecionado = ` AND 
+          ec.data_pre >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
+      AND 
+          ec.data_pre < DATE_TRUNC('month', CURRENT_DATE) `;
+  }
+  if ((periodo == "180 DIAS")) {
+    sqlSelecionado =
+      " AND  ec.data_pre BETWEEN CURRENT_DATE - INTERVAL '180 days' AND CURRENT_DATE ";
+  }
+
+  let sql = `SELECT 
+                ec.np,
+                SUBSTRING(ec.cliente FROM 1 FOR 15) AS cliente,
+                SUM(ec.vlr_total) AS acumulado
+            FROM 
+                entregas_contatos ec
+            WHERE 
+                ec.status = 'Pendente'
+            AND 
+                ec.codloja = $1
+            AND 
+                ec.cod_cliente_pre <> '00003404'
+            AND 
+                ec.cod_cliente_pre <> '7000407'
+            ${sqlSelecionado}
+            GROUP BY 
+                ec.np, ec.cliente
+            ORDER BY 
+                acumulado DESC`;
+  console.log(sql);
+  let rs;
+  try {
+    rs = await pg.execute(sql, [idLoja]);
+
+    console.log(rs.rows[0]);
+
+    const response = {
+      lista_nps_cliente: rs.rows,
+    };
+    res.status(200).send(response);
+  } catch (error) {
+    console.log(error);
+    return res.status(404).send({ error: error, mensagem: "Erro ao procurar" });
+  }
+};
