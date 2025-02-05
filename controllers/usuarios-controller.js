@@ -4,9 +4,11 @@ const moment = require("moment");
 exports.login = async (req, res) => {
   console.log("------------- usuarios-login -------------------");
   let x = req.body;
-  let usuario = x.usuario;
+  let usuario = x.usuario.toLowerCase();
   let senha = x.senha;
   let ativo = "S";
+
+  console.log(usuario)
 
   let sqlLogin =
     'SELECT u."idUsuario" as idusuario, ' +
