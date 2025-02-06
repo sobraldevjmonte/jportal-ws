@@ -28,6 +28,8 @@ router.get("/dashboard/lista-dashboard-gerente-vendedor-lista-detalhes/:idLoja/:
 router.get("/dashboard/lista-dashboard-gerente-indicador-lista/:idLoja", DashboardGerente.listaDadosGerenteIndicadorLista);
 router.get("/dashboard/lista-dashboard-gerente-indicador-lista-detalhes/:idLoja/:indicador", DashboardGerente.listaDadosGerenteIndicadorListaDetalhe);
 
+
+
 //-------------------------- LSITA NP POR VENDEDOR GERAL-----------------------------
 router.get("/dashboard/lista-dashboard-nps-gerente-nps-geral-hoje/:idLoja/:periodo", DashboardGerente.listaDadosGerenteGeralNps);
 
