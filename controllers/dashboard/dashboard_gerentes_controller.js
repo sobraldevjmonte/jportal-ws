@@ -19,13 +19,16 @@ exports.listaDadosGeralGerenteHoje = async (req, res) => {
                                                   AND ec.cod_cliente_pre <> '00003404'
                                                   AND ec.cod_cliente_pre <> '7000407'
                                                   AND ec.codloja  = $1
-                                                  AND ec.data_pre = CURRENT_DATE`;
+                                                  AND ec.data_pre = CURRENT_DATE
+                                                  HAVING 
+                                                      SUM(ec.vlr_total) > $2`;
 
   console.log(sqlVendasPendentesDashVendedorGeralHoje);
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralHoje, [
       idLoja,
+      limiteValor,
     ]);
 
     const response = {
@@ -55,12 +58,15 @@ exports.listaDadosGeralGerenteDiaAnterior = async (req, res) => {
         AND 
             ec.cod_cliente_pre <> '7000407'
         AND 
-            ec.data_pre  > CURRENT_DATE - INTERVAL '2 day'`;
+            ec.data_pre  > CURRENT_DATE - INTERVAL '2 day'
+        HAVING 
+            SUM(ec.vlr_total) > $2`;
 
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralDiaAnterior, [
       idLoja,
+      limiteValor,
     ]);
 
     const response = {
@@ -91,12 +97,15 @@ exports.listaDadosGeralGerenteSemanaAnterior = async (req, res) => {
         AND 
             ec.data_pre BETWEEN 
               DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '7 days' 
-              AND DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '1 day'`;
+              AND DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '1 day'
+        HAVING 
+            SUM(ec.vlr_total) > $2`;
 
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralSemanaAnterior, [
       idLoja,
+      limiteValor,
     ]);
 
     const response = {
@@ -126,12 +135,15 @@ exports.listaDadosGeralGerenteMesAnterior = async (req, res) => {
         AND 
             ec.data_pre >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
         AND 
-            ec.data_pre < DATE_TRUNC('month', CURRENT_DATE)`;
+            ec.data_pre < DATE_TRUNC('month', CURRENT_DATE)
+        HAVING 
+            SUM(ec.vlr_total) > $2`;
 
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralDiaAnterior, [
       idLoja,
+      limiteValor,
     ]);
 
     const response = {
@@ -160,12 +172,15 @@ exports.listaDadosGeralGerenteSeisMeses = async (req, res) => {
         AND 
             ec.cod_cliente_pre <> '7000407'
         AND 
-            ec.data_pre BETWEEN CURRENT_DATE - INTERVAL '180 days' AND CURRENT_DATE`;
+            ec.data_pre BETWEEN CURRENT_DATE - INTERVAL '180 days' AND CURRENT_DATE
+        HAVING 
+            SUM(ec.vlr_total) > $2`;
 
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralSeisMeses, [
       idLoja,
+      limiteValor,
     ]);
 
     console.log(rs.rows[0]);
@@ -197,14 +212,14 @@ exports.listaDadosGeralGerenteClienteLista = async (req, res) => {
                         AND 
                             ec.codloja = $1
                         AND 
-                          ec.vlr_total > $3
-                        AND 
                             ec.cod_cliente_pre <> '00003404'
                         AND 
                             ec.cod_cliente_pre <> '7000407'
                         AND ec.data_pre > CURRENT_DATE - INTERVAL '180 days'
                     GROUP BY 
-                        ec.cod_cliente_pre, ec.cliente 
+                        ec.cod_cliente_pre, ec.cliente
+                    HAVING 
+                      SUM(ec.vlr_total) > $3 
                     ORDER BY 
                         valorTotal DESC 
                     LIMIT $2`;
@@ -290,13 +305,16 @@ async function listaPorClienteGerenteUmDia(idloja, cod_cliente) {
         AND
             ec.cod_cliente_pre  = $2
         AND 
-            ec.data_pre  > CURRENT_DATE - INTERVAL '2 day'`;
+            ec.data_pre  > CURRENT_DATE - INTERVAL '2 day'
+        HAVING 
+            SUM(ec.vlr_total) > $3 `;
 
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralDiaAnterior, [
       idloja,
       cod_cliente,
+      limiteValor,
     ]);
     return rs.rows[0].acumulado;
   } catch (error) {
@@ -314,17 +332,20 @@ async function listaPorClienteGerenteSemanaAnterior(idloja, cod_cliente) {
         AND 
             ec.codloja = $1
         AND
-              ec.cod_cliente_pre  = $2
+            ec.cod_cliente_pre  = $2
         AND 
             ec.data_pre BETWEEN 
               DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '7 days' 
-              AND DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '1 day'`;
+              AND DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '1 day'
+        HAVING 
+            SUM(ec.vlr_total) > $3`;
 
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralDiaAnterior, [
       idloja,
       cod_cliente,
+      limiteValor,
     ]);
     return rs.rows[0].acumulado;
   } catch (error) {
@@ -346,13 +367,16 @@ async function listaPorClienteGerenteMesAnterior(idloja, cod_cliente) {
         AND 
             ec.data_pre >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
         AND 
-            ec.data_pre < DATE_TRUNC('month', CURRENT_DATE)`;
+            ec.data_pre < DATE_TRUNC('month', CURRENT_DATE)
+         HAVING 
+            SUM(ec.vlr_total) > $3`;
 
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralDiaAnterior, [
       idloja,
       cod_cliente,
+      limiteValor,
     ]);
     return rs.rows[0].acumulado;
   } catch (error) {
@@ -372,13 +396,16 @@ async function listaPorClienteGerente180Dias(idloja, cod_cliente) {
         AND
             ec.cod_cliente_pre  = $2
         AND 
-            ec.data_pre BETWEEN CURRENT_DATE - INTERVAL '180 days' AND CURRENT_DATE`;
+            ec.data_pre BETWEEN CURRENT_DATE - INTERVAL '180 days' AND CURRENT_DATE
+        HAVING 
+            SUM(ec.vlr_total) > $3`;
 
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralDiaAnterior, [
       idloja,
       cod_cliente,
+      limiteValor,
     ]);
     return rs.rows[0].acumulado;
   } catch (error) {
@@ -405,14 +432,14 @@ exports.listaDadosGeralGerenteVendedoresLista = async (req, res) => {
                         AND 
                             ec.codloja = $1
                         AND 
-                          ec.vlr_total > $3
-                        AND 
                             ec.cod_cliente_pre <> '00003404'
                         AND 
                             ec.cod_cliente_pre <> '7000407'
                         AND ec.data_pre > CURRENT_DATE - INTERVAL '180 days'
                     GROUP BY 
                         ec.cod_vendedor_pre, ec.vendedor
+                    HAVING 
+                        SUM(ec.vlr_total) > $3
                     ORDER BY 
                         acumulado DESC 
                     LIMIT $2`;
@@ -499,13 +526,16 @@ async function listaPorVendedorGerenteUmDia(idloja, vendedor) {
           AND 
               ec.cod_cliente_pre <> '7000407'
           AND 
-              ec.data_pre  > CURRENT_DATE - INTERVAL '2 day'`;
+              ec.data_pre  > CURRENT_DATE - INTERVAL '2 day'
+          HAVING 
+              SUM(ec.vlr_total) > $3`;
 
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralDiaAnterior, [
       idloja,
       vendedor,
+      limiteValor,
     ]);
     return rs.rows[0].acumulado;
   } catch (error) {
@@ -531,13 +561,16 @@ async function listaPorVendedorGerenteSemanaAnterior(idloja, vendedor) {
           AND 
               ec.data_pre BETWEEN 
                 DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '7 days' 
-                AND DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '1 day'`;
+                AND DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '1 day'
+           HAVING 
+              SUM(ec.vlr_total) > $3`;
 
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralDiaAnterior, [
       idloja,
       vendedor,
+      limiteValor,
     ]);
     return rs.rows[0].acumulado;
   } catch (error) {
@@ -563,13 +596,16 @@ async function listaPorVendedorGerenteMesAnterior(idloja, vendedor) {
           AND 
               ec.data_pre >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
           AND 
-              ec.data_pre < DATE_TRUNC('month', CURRENT_DATE)`;
+              ec.data_pre < DATE_TRUNC('month', CURRENT_DATE)
+           HAVING 
+              SUM(ec.vlr_total) > $3`;
 
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralDiaAnterior, [
       idloja,
       vendedor,
+      limiteValor,
     ]);
     return rs.rows[0].acumulado;
   } catch (error) {
@@ -593,13 +629,16 @@ async function listaPorVendedorGerente180Dias(idloja, vendedor) {
           AND 
               ec.cod_cliente_pre <> '7000407'
           AND 
-              ec.data_pre BETWEEN CURRENT_DATE - INTERVAL '180 days' AND CURRENT_DATE`;
+              ec.data_pre BETWEEN CURRENT_DATE - INTERVAL '180 days' AND CURRENT_DATE
+          HAVING 
+              SUM(ec.vlr_total) > $3`;
 
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralDiaAnterior, [
       idloja,
       vendedor,
+      limiteValor,
     ]);
     return rs.rows[0].acumulado;
   } catch (error) {
@@ -636,12 +675,14 @@ exports.listaDadosGerenteIndicadorLista = async (req, res) => {
             ec.data_pre > CURRENT_DATE - INTERVAL '180 days'
     GROUP BY 
         ec.cod_indica_pre
+    HAVING 
+        SUM(ec.vlr_total) > $3
     ORDER BY 
         valortotal DESC 
     LIMIT $2`;
 
   try {
-    let rs = await pg.execute(sqlLista, [idLoja, limiteRegistros]);
+    let rs = await pg.execute(sqlLista, [idLoja, limiteRegistros, limiteValor]);
 
     // Para cada indicador, buscar o nome associado
     let listaResultados = [];
@@ -679,7 +720,6 @@ exports.listaDadosGerenteIndicadorLista = async (req, res) => {
       .send({ error: error, mensagem: "Erro ao procurar os dados." });
   }
 };
-
 
 exports.listaDadosGerenteIndicadorListaDetalhe = async (req, res) => {
   console.log("******** listaDadosGeralVendedorClienteListaDetalhe *********");
@@ -735,7 +775,6 @@ exports.listaDadosGerenteIndicadorListaDetalhe = async (req, res) => {
   }
 };
 
-
 async function listaPorIndicadorGerenteUmDia(idLoja, indicador) {
   console.log("******** listaPorIndicadorGerenteUmDia *********");
 
@@ -752,13 +791,16 @@ async function listaPorIndicadorGerenteUmDia(idLoja, indicador) {
       AND
         TRIM(ec.cod_indica_pre) = $2
       AND 
-          ec.data_pre  > CURRENT_DATE - INTERVAL '2 day'`;
+          ec.data_pre  > CURRENT_DATE - INTERVAL '2 day'
+      HAVING 
+        SUM(ec.vlr_total) > $3`;
 
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralDiaAnterior, [
       idLoja,
       indicador,
+      limiteValor,
     ]);
     return rs.rows[0].acumulado;
   } catch (error) {
@@ -784,13 +826,16 @@ async function listaPorIndicadorGerenteSemanaAnterior(idLoja, indicador) {
       AND 
           ec.data_pre BETWEEN 
             DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '7 days' 
-            AND DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '1 day'`;
+            AND DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '1 day'
+      HAVING 
+          SUM(ec.vlr_total) > $3`;
 
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralDiaAnterior, [
       idLoja,
       indicador,
+      limiteValor,
     ]);
     return rs.rows[0].acumulado;
   } catch (error) {
@@ -816,13 +861,16 @@ async function listaPorIndicadorGerenteMesAnterior(idLoja, indicador) {
       AND 
           ec.data_pre >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
       AND 
-          ec.data_pre < DATE_TRUNC('month', CURRENT_DATE)`;
+          ec.data_pre < DATE_TRUNC('month', CURRENT_DATE)
+      HAVING 
+          SUM(ec.vlr_total) > $3`;
 
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralDiaAnterior, [
       idLoja,
       indicador,
+      limiteValor,
     ]);
     return rs.rows[0].acumulado;
   } catch (error) {
@@ -846,7 +894,9 @@ async function listaPorIndicadorGerente180Dias(idLoja, cod_cliente) {
       AND
           TRIM(ec.cod_indica_pre)  = $2
       AND 
-          ec.data_pre BETWEEN CURRENT_DATE - INTERVAL '180 days' AND CURRENT_DATE`;
+          ec.data_pre BETWEEN CURRENT_DATE - INTERVAL '180 days' AND CURRENT_DATE
+      HAVING 
+          SUM(ec.vlr_total) > $3`;
 
   let rs;
   console.log(sqlVendasPendentesDashVendedorGeralDiaAnterior);
@@ -854,6 +904,7 @@ async function listaPorIndicadorGerente180Dias(idLoja, cod_cliente) {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralDiaAnterior, [
       idLoja,
       cod_cliente,
+      limiteValor,
     ]);
     return rs.rows[0].acumulado;
   } catch (error) {
@@ -862,33 +913,32 @@ async function listaPorIndicadorGerente180Dias(idLoja, cod_cliente) {
   }
 }
 
-
 exports.listaDadosGerenteGeralNps = async (req, res) => {
   console.log("******** listaDadosVendedorClientesNps *********");
 
   let periodo = req.params.periodo;
   let idLoja = req.params.idLoja;
-  console.log('periodo: ' + periodo, 'idLoja: ' + idLoja);
+  console.log("periodo: " + periodo, "idLoja: " + idLoja);
 
   let sqlSelecionado = "";
-  if ((periodo == "HOJE")) {
+  if (periodo == "HOJE") {
     sqlSelecionado = " AND ec.data_pre = CURRENT_DATE ";
   }
-  if ((periodo == "DIA ANT.")) {
+  if (periodo == "DIA ANT.") {
     sqlSelecionado = " AND ec.data_pre  > CURRENT_DATE - INTERVAL '2 day' ";
   }
-  if ((periodo == "SEMANA ANT.")) {
+  if (periodo == "SEMANA ANT.") {
     sqlSelecionado = ` AND ec.data_pre BETWEEN 
             DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '7 days' 
             AND DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '1 day' `;
   }
-  if ((periodo == "MÊS ANT.")) {
+  if (periodo == "MÊS ANT.") {
     sqlSelecionado = ` AND 
           ec.data_pre >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
       AND 
           ec.data_pre < DATE_TRUNC('month', CURRENT_DATE) `;
   }
-  if ((periodo == "180 DIAS")) {
+  if (periodo == "180 DIAS") {
     sqlSelecionado =
       " AND  ec.data_pre BETWEEN CURRENT_DATE - INTERVAL '180 days' AND CURRENT_DATE ";
   }
@@ -910,12 +960,14 @@ exports.listaDadosGerenteGeralNps = async (req, res) => {
             ${sqlSelecionado}
             GROUP BY 
                 ec.np, ec.cliente
+            HAVING 
+                SUM(ec.vlr_total) > $2
             ORDER BY 
                 acumulado DESC`;
   console.log(sql);
   let rs;
   try {
-    rs = await pg.execute(sql, [idLoja]);
+    rs = await pg.execute(sql, [idLoja, limiteValor]);
 
     console.log(rs.rows[0]);
 
