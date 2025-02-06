@@ -12,7 +12,8 @@ exports.listaDadosGeralVendedorSeisMeses = async (req, res) => {
   let codigoVendedor = req.params.idVendedor;
 
   let sqlVendasPendentesDashVendedorGeralSeisMeses = `select 
-          SUM(ec.vlr_total) AS acumuladoSeisMeses  
+          SUM(ec.vlr_total) AS acumuladoSeisMeses,
+          COUNT(ec.np) AS total_pedidos   
       FROM 
           entregas_contatos ec where ec.status = 'Pendente' 
       AND 
@@ -49,7 +50,8 @@ exports.listaDadosGeralVendedorMesAnterior = async (req, res) => {
 
   let codigoVendedor = req.params.idVendedor;
   let sqlVendasPendentesDashVendedorGeralDiaAnterior = `select 
-          SUM(ec.vlr_total) AS acumuladoMesAnterior  
+          SUM(ec.vlr_total) AS acumuladoMesAnterior ,
+          COUNT(ec.np) AS total_pedidos  
       FROM 
           entregas_contatos ec where ec.status = 'Pendente' 
       AND 
@@ -87,7 +89,8 @@ exports.listaDadosGeralVendedorSemanaAnterior = async (req, res) => {
   let codigoVendedor = req.params.idVendedor;
 
   let sqlVendasPendentesDashVendedorGeralSemanaAnterior = `select 
-          SUM(ec.vlr_total) AS acumuladoSemanAnterior  
+          SUM(ec.vlr_total) AS acumuladoSemanAnterior ,
+          COUNT(ec.np) AS total_pedidos  
       FROM 
           entregas_contatos ec where ec.status = 'Pendente' 
       AND 
@@ -125,7 +128,8 @@ exports.listaDadosGeralVendedorHoje = async (req, res) => {
   let codigoVendedor = req.params.idVendedor;
 
   let sqlVendasPendentesDashVendedorGeralHoje = `SELECT 
-                SUM(ec.vlr_total) AS acumuladohoje  
+                SUM(ec.vlr_total) AS acumuladohoje ,
+                COUNT(ec.np) AS total_pedidos 
             FROM 
                 entregas_contatos ec 
             WHERE 
@@ -163,7 +167,8 @@ exports.listaDadosGeralVendedorDiaAnterior = async (req, res) => {
   let codigoVendedor = req.params.idVendedor;
 
   let sqlVendasPendentesDashVendedorGeralDiaAnterior = `select 
-          SUM(ec.vlr_total) AS acumuladoUmDia  
+          SUM(ec.vlr_total) AS acumuladoUmDia,
+          COUNT(ec.np) AS total_pedidos 
       FROM 
           entregas_contatos ec where ec.status = 'Pendente' 
       AND 
