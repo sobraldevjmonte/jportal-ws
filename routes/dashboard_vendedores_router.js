@@ -14,7 +14,6 @@ router.get("/dashboard/lista-dashboard-vendedor-geral-seis-meses/:idVendedor", D
 // ---------------------- POR VENDEDOR X CLIENTES RANKING --------------------
 router.get("/dashboard/lista-dashboard-vendedor-cliente-lista/:idVendedor", DashboardVendedor.listaDadosGeralVendedorClienteLista);
 router.get("/dashboard/lista-dashboard-vendedor-cliente-lista-detalhes/:vendedor/:cliente", DashboardVendedor.listaDadosGeralVendedorClienteListaDetalhe);
-// router.get("/dashboard/lista-dashboard-vendedor-cliente-um-dia/:idVendedor", DashboardVendedor.listaDadosGeralVendedorClienteDiaAnterior);
 
 // ---------------------- POR VENDEDOR X INDICADOR RANKING --------------------
 router.get("/dashboard/lista-dashboard-vendedor-indicador-lista/:idVendedor", DashboardVendedor.listaDadosGeralVendedorIndicadorLista);

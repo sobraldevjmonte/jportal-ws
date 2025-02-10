@@ -13,7 +13,7 @@ exports.listaDadosGeralVendedorSeisMeses = async (req, res) => {
 
   let sqlVendasPendentesDashVendedorGeralSeisMeses = `select 
           SUM(ec.vlr_total) AS acumuladoSeisMeses,
-          COUNT(ec.np) AS total_pedidos   
+          COUNT(distinct(ec.np)) AS total_pedidos   
       FROM 
           entregas_contatos ec where ec.status = 'Pendente' 
       AND 
@@ -53,7 +53,7 @@ exports.listaDadosGeralVendedorMesAnterior = async (req, res) => {
   let codigoVendedor = req.params.idVendedor;
   let sqlVendasPendentesDashVendedorGeralDiaAnterior = `select 
           SUM(ec.vlr_total) AS acumuladoMesAnterior ,
-          COUNT(ec.np) AS total_pedidos  
+         COUNT(distinct(ec.np)) AS total_pedidos 
       FROM 
           entregas_contatos ec where ec.status = 'Pendente' 
       AND 
@@ -92,7 +92,7 @@ exports.listaDadosGeralVendedorSemanaAnterior = async (req, res) => {
 
   let sqlVendasPendentesDashVendedorGeralSemanaAnterior = `select 
           SUM(ec.vlr_total) AS acumuladoSemanAnterior ,
-          COUNT(ec.np) AS total_pedidos  
+          COUNT(distinct(ec.np)) AS total_pedidos   
       FROM 
           entregas_contatos ec where ec.status = 'Pendente' 
       AND 
@@ -131,7 +131,7 @@ exports.listaDadosGeralVendedorHoje = async (req, res) => {
 
   let sqlVendasPendentesDashVendedorGeralHoje = `SELECT 
                 SUM(ec.vlr_total) AS acumuladohoje ,
-                COUNT(ec.np) AS total_pedidos 
+                COUNT(distinct(ec.np)) AS total_pedidos 
             FROM 
                 entregas_contatos ec 
             WHERE 
@@ -169,7 +169,7 @@ exports.listaDadosGeralVendedorDiaAnterior = async (req, res) => {
 
   let sqlVendasPendentesDashVendedorGeralDiaAnterior = `select 
           SUM(ec.vlr_total) AS acumuladoUmDia,
-          COUNT(ec.np) AS total_pedidos 
+          COUNT(distinct(ec.np)) AS total_pedidos 
       FROM 
           entregas_contatos ec where ec.status = 'Pendente' 
       AND 
@@ -179,7 +179,7 @@ exports.listaDadosGeralVendedorDiaAnterior = async (req, res) => {
       AND 
           ec.cod_cliente_pre <> '7000407'
       AND 
-          ec.data_pre  > CURRENT_DATE - INTERVAL '2 day'
+          ec.data_pre = CURRENT_DATE - INTERVAL '1 day'
       HAVING 
           SUM(ec.vlr_total) > $2`;
 
@@ -812,7 +812,7 @@ exports.listaDadosVendedorGeralNps = async (req, res) => {
     sqlSelecionado = " AND ec.data_pre = CURRENT_DATE ";
   }
   if (periodo == "DIA ANT.") {
-    sqlSelecionado = " AND ec.data_pre  > CURRENT_DATE - INTERVAL '2 day' ";
+    sqlSelecionado = "  AND ec.data_pre = CURRENT_DATE - INTERVAL '1 day'";
   }
   if (periodo == "SEMANA ANT.") {
     sqlSelecionado = ` AND ec.data_pre BETWEEN 
