@@ -27,6 +27,8 @@ exports.listaDadosGeralVendedorSeisMeses = async (req, res) => {
       HAVING 
           SUM(ec.vlr_total) > $2`;
 
+  console.log(sqlVendasPendentesDashVendedorGeralSeisMeses);
+
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralSeisMeses, [
@@ -151,7 +153,6 @@ exports.listaDadosGeralVendedorHoje = async (req, res) => {
       limiteValor,
     ]);
 
-    console.log(rs);
     const response = {
       lista_hoje_vendedor: rs.rows,
     };
