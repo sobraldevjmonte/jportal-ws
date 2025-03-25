@@ -12,7 +12,7 @@ exports.somaGeralRegistros = async (req, res) => {
   let codigoVendedor = req.params.idVendedor;
 
   let sqlContagemGeralPedidos = `select 
-          COUNT(distinct(ec.np)) AS somaGeralPedidos   
+          COUNT(distinct(ec.np)) AS somageralpedidos   
       FROM 
           entregas_contatos ec where ec.status = 'Pendente' 
       AND 
@@ -37,8 +37,10 @@ exports.somaGeralRegistros = async (req, res) => {
     ]);
     console.log(rs.rows[0]);
 
+    let somaGeralPedidos = rs.rows.length > 0 ? rs.rows[0].somageralpedidos : 0;
+
     const response = {
-      soma_geral_pedidos: rs.rows[0].somageralpedidos,
+      soma_geral_pedidos: somaGeralPedidos,
     };
     res.status(200).send(response);
   } catch (error) {
@@ -52,7 +54,7 @@ exports.somaGeralValores = async (req, res) => {
   let codigoVendedor = req.params.idVendedor;
 
   let sqlContagemGeralValores = `select 
-          SUM(ec.vlr_total) AS somaGeralValores 
+          SUM(ec.vlr_total) AS somageralvalores 
       FROM 
           entregas_contatos ec where ec.status = 'Pendente' 
       AND 
@@ -76,9 +78,10 @@ exports.somaGeralValores = async (req, res) => {
     ]);
 
     console.log(rs.rows[0]);
+    let somaGeralValores = rs.rows.length > 0 ? rs.rows[0].somageralvalores : 0;
 
     const response = {
-      soma_geral_valores: rs.rows[0].somageralvalores,
+      soma_geral_valores: somaGeralValores,
     };
     res.status(200).send(response);
   } catch (error) {
@@ -225,6 +228,7 @@ exports.listaDadosGeralVendedorHoje = async (req, res) => {
                 AND ec.data_pre = CURRENT_DATE
                 HAVING 
                 SUM(ec.vlr_total) > $2`;
+                console.log(sqlVendasPendentesDashVendedorGeralHoje)
 
   let rs;
   try {

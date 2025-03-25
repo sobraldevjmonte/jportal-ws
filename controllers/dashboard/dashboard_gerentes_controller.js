@@ -61,10 +61,7 @@ exports.somaGeralValores = async (req, res) => {
   try {
     rs = await pg.execute(sqlContagemGeralValores, [idLoja, limiteValor]);
 
-    console.log(rs.rows[0]);
     let somaGeralValores = rs.rows.length > 0 ? rs.rows[0].somageralvalores : 0;
-    console.log(somaGeralValores);
-
     const response = {
       soma_geral_valores: somaGeralValores,
     };
