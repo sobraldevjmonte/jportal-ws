@@ -14,6 +14,10 @@ router.get("/dashboard/lista-dashboard-gerente-geral-semana-anterior/:idLoja", D
 router.get("/dashboard/lista-dashboard-gerente-geral-mes-anterior/:idLoja", DashboardGerente.listaDadosGeralGerenteMesAnterior);
 router.get("/dashboard/lista-dashboard-gerente-geral-seis-meses/:idLoja", DashboardGerente.listaDadosGeralGerenteSeisMeses);
 
+//******** contagem geral registros/valores gerente dashboard  ***********/
+router.get("/dashboard/soma-geral-registros-gerente/:idLoja", DashboardGerente.somaGeralRegistros);
+router.get("/dashboard/soma-geral-valores-gerente/:idLoja", DashboardGerente.somaGeralValores);
+
 
 // ---------------------- POR GERENTE X CLIENTES RANKING --------------------
 router.get("/dashboard/lista-dashboard-gerente-cliente-lista/:idLoja", DashboardGerente.listaDadosGeralGerenteClienteLista);

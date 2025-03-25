@@ -33,7 +33,7 @@ cron.schedule("0 * * * *", async () => {
   } catch (error) {
     console.error("Erro ao executar a tarefa agendada:", error);
   }
-});
+}); 
 
 const bodyParser = require("body-parser");
 const rotaRT = require("./routes/rt_router");

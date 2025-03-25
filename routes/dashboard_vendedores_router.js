@@ -10,6 +10,10 @@ router.get("/dashboard/lista-dashboard-vendedor-geral-semana-anterior/:idVendedo
 router.get("/dashboard/lista-dashboard-vendedor-geral-mes-anterior/:idVendedor", DashboardVendedor.listaDadosGeralVendedorMesAnterior);
 router.get("/dashboard/lista-dashboard-vendedor-geral-seis-meses/:idVendedor", DashboardVendedor.listaDadosGeralVendedorSeisMeses);
 
+//******** contagem geral registros/valores vendedor dashboard  ***********/
+router.get("/dashboard/soma-geral-registros/:idVendedor", DashboardVendedor.somaGeralRegistros);
+router.get("/dashboard/soma-geral-valores/:idVendedor", DashboardVendedor.somaGeralValores);
+
 
 // ---------------------- POR VENDEDOR X CLIENTES RANKING --------------------
 router.get("/dashboard/lista-dashboard-vendedor-cliente-lista/:idVendedor", DashboardVendedor.listaDadosGeralVendedorClienteLista);

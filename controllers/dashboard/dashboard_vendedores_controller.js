@@ -6,6 +6,87 @@ const moment = require("moment");
 const limiteRegistros = 1000;
 const limiteValor = 100;
 
+exports.somaGeralRegistros = async (req, res) => {
+  console.log("******** contagemGeralPedidos Vendedor *********");
+
+  let codigoVendedor = req.params.idVendedor;
+
+  let sqlContagemGeralPedidos = `select 
+          COUNT(distinct(ec.np)) AS somaGeralPedidos   
+      FROM 
+          entregas_contatos ec where ec.status = 'Pendente' 
+      AND 
+          ec.cod_vendedor_pre = $1
+      AND 
+        ec.cod_cliente_pre <> '00003404'
+      AND 
+          ec.cod_cliente_pre <> '7000407'
+      AND 
+          ec.data_pre BETWEEN CURRENT_DATE - INTERVAL '180 days' AND CURRENT_DATE
+      HAVING 
+          SUM(ec.vlr_total) > $2`;
+
+  console.log(sqlContagemGeralPedidos);
+
+  let rs;
+  
+  try {
+    rs = await pg.execute(sqlContagemGeralPedidos, [
+      codigoVendedor,
+      limiteValor,
+    ]);
+    console.log(rs.rows[0]);
+
+    const response = {
+      soma_geral_pedidos: rs.rows[0].somageralpedidos,
+    };
+    res.status(200).send(response);
+  } catch (error) {
+    console.log(error);
+    return res.status(404).send({ error: error, mensagem: "Erro ao procurar" });
+  }
+};
+exports.somaGeralValores = async (req, res) => {
+  console.log("******** contagemGeralValores Vendedor*********");
+
+  let codigoVendedor = req.params.idVendedor;
+
+  let sqlContagemGeralValores = `select 
+          SUM(ec.vlr_total) AS somaGeralValores 
+      FROM 
+          entregas_contatos ec where ec.status = 'Pendente' 
+      AND 
+          ec.cod_vendedor_pre = $1
+      AND 
+        ec.cod_cliente_pre <> '00003404'
+      AND 
+          ec.cod_cliente_pre <> '7000407'
+      AND 
+          ec.data_pre BETWEEN CURRENT_DATE - INTERVAL '180 days' AND CURRENT_DATE
+      HAVING 
+          SUM(ec.vlr_total) > $2`;
+
+  console.log(sqlContagemGeralValores);
+
+  let rs;
+  try {
+    rs = await pg.execute(sqlContagemGeralValores, [
+      codigoVendedor,
+      limiteValor,
+    ]);
+
+    console.log(rs.rows[0]);
+
+    const response = {
+      soma_geral_valores: rs.rows[0].somageralvalores,
+    };
+    res.status(200).send(response);
+  } catch (error) {
+    console.log(error);
+    return res.status(404).send({ error: error, mensagem: "Erro ao procurar" });
+  }
+};
+
 exports.listaDadosGeralVendedorSeisMeses = async (req, res) => {
   console.log("******** listaDadosGeralVendedorSeisMeses *********");
 
@@ -145,13 +226,14 @@ exports.listaDadosGeralVendedorHoje = async (req, res) => {
                 HAVING 
                 SUM(ec.vlr_total) > $2`;
 
-  console.log(sqlVendasPendentesDashVendedorGeralHoje);
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralHoje, [
       codigoVendedor,
       limiteValor,
     ]);
+
+    console.log(rs)
 
     const response = {
       lista_hoje_vendedor: rs.rows,

@@ -5,13 +5,81 @@ const moment = require("moment");
 const limiteRegistros = 1000;
 const limiteValor = 100;
 
-exports.listaDadosGeralGerenteHoje = async (req, res) => {
-  console.log("******** listaDadosGeralGerenteHoje *********");
+exports.somaGeralRegistros = async (req, res) => {
+  let idLoja = req.params.idLoja;
+
+  let sqlContagemGeralPedidos = `select 
+            COUNT(distinct(ec.np)) AS somaGeralPedidos  
+        FROM 
+            entregas_contatos ec where ec.status = 'Pendente' 
+        AND 
+             ec.codloja = $1
+        AND 
+            ec.cod_cliente_pre <> '00003404'
+        AND 
+            ec.cod_cliente_pre <> '7000407'
+        AND 
+            ec.data_pre BETWEEN CURRENT_DATE - INTERVAL '180 days' AND CURRENT_DATE
+        HAVING 
+            SUM(ec.vlr_total) > $2`;
+
+  let rs;
+  try {
+    rs = await pg.execute(sqlContagemGeralPedidos, [idLoja, limiteValor]);
+
+    let somaGeralPedidos = rs.rows.length > 0 ? rs.rows[0].somageralpedidos : 0;
+    const response = {
+      soma_geral_pedidos: somaGeralPedidos,
+    };
+    res.status(200).send(response);
+  } catch (error) {
+    console.log(error);
+    return res.status(404).send({ error: error, mensagem: "Erro ao procurar" });
+  }
+};
+exports.somaGeralValores = async (req, res) => {
+  console.log("******** contagemGeralValores Gerente *********");
 
   let idLoja = req.params.idLoja;
-  console.log(idLoja);
+
+  let sqlContagemGeralValores = `select 
+           SUM(ec.vlr_total) AS somaGeralValores 
+        FROM 
+            entregas_contatos ec where ec.status = 'Pendente' 
+        AND 
+             ec.codloja = $1
+        AND 
+            ec.cod_cliente_pre <> '00003404'
+        AND 
+            ec.cod_cliente_pre <> '7000407'
+        AND 
+            ec.data_pre BETWEEN CURRENT_DATE - INTERVAL '180 days' AND CURRENT_DATE
+        HAVING 
+            SUM(ec.vlr_total) > $2`;
+
+  let rs;
+  try {
+    rs = await pg.execute(sqlContagemGeralValores, [idLoja, limiteValor]);
+
+    console.log(rs.rows[0]);
+    let somaGeralValores = rs.rows.length > 0 ? rs.rows[0].somageralvalores : 0;
+    console.log(somaGeralValores);
+
+    const response = {
+      soma_geral_valores: somaGeralValores,
+    };
+    res.status(200).send(response);
+  } catch (error) {
+    console.log(error);
+    return res.status(404).send({ error: error, mensagem: "Erro ao procurar" });
+  }
+};
+
+exports.listaDadosGeralGerenteHoje = async (req, res) => {
+  let idLoja = req.params.idLoja;
   let sqlVendasPendentesDashVendedorGeralHoje = `SELECT 
-                                                  SUM(ec.vlr_total) AS acumuladohoje  
+                                                  SUM(ec.vlr_total) AS acumuladohoje  ,
+                                                  COUNT(distinct(ec.np)) AS total_pedidos 
                                               FROM 
                                                   entregas_contatos ec 
                                               WHERE 
@@ -22,8 +90,6 @@ exports.listaDadosGeralGerenteHoje = async (req, res) => {
                                                   AND ec.data_pre = CURRENT_DATE
                                                   HAVING 
                                                       SUM(ec.vlr_total) > $2`;
-
-  console.log(sqlVendasPendentesDashVendedorGeralHoje);
   let rs;
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralHoje, [
@@ -31,8 +97,15 @@ exports.listaDadosGeralGerenteHoje = async (req, res) => {
       limiteValor,
     ]);
 
+    console.log(rs);
+
+    let acumuladoHoje = rs.rows.length > 0 ? rs.rows[0].acumuladohoje : 0;
+    let total_pedidos =
+      rs.rows.length > 0 ? rs.rows[0].total_pedidos : 0;
+
     const response = {
-      lista_um_hoje: rs.rows,
+      lista_um_hoje: acumuladoHoje,
+      total_pedidos,
     };
     res.status(200).send(response);
   } catch (error) {
@@ -41,12 +114,10 @@ exports.listaDadosGeralGerenteHoje = async (req, res) => {
   }
 };
 exports.listaDadosGeralGerenteDiaAnterior = async (req, res) => {
-  console.log("******** listaDadosGeralVendedorDiaAnterior *********");
-
   let idLoja = req.params.idLoja;
-  console.log(idLoja);
   let sqlVendasPendentesDashVendedorGeralDiaAnterior = `select 
-            SUM(ec.vlr_total) AS acumuladoUmDia  
+            SUM(ec.vlr_total) AS acumuladoUmDia ,
+            COUNT(distinct(ec.np)) AS total_pedidos 
         FROM 
             entregas_contatos ec 
         WHERE 
@@ -69,8 +140,12 @@ exports.listaDadosGeralGerenteDiaAnterior = async (req, res) => {
       limiteValor,
     ]);
 
+    let acumuladoDiaAnt = rs.rows.length > 0 ? rs.rows[0].acumuladoUmDia : 0;
+    let total_pedidos = rs.rows.length > 0 ? rs.rows[0].total_pedidos : 0;
+
     const response = {
-      lista_um_dia_vendedor: rs.rows,
+      lista_um_dia_vendedor: acumuladoDiaAnt,
+      total_pedidos,
     };
     res.status(200).send(response);
   } catch (error) {
@@ -80,12 +155,10 @@ exports.listaDadosGeralGerenteDiaAnterior = async (req, res) => {
 };
 
 exports.listaDadosGeralGerenteSemanaAnterior = async (req, res) => {
-  console.log("******** listaDadosGeralVendedorSemanaAnterior *********");
-
   let idLoja = req.params.idLoja;
-
   let sqlVendasPendentesDashVendedorGeralSemanaAnterior = `select 
-            SUM(ec.vlr_total) AS acumuladoSemanAnterior  
+            SUM(ec.vlr_total) AS acumuladosemananterior  ,
+            COUNT(distinct(ec.np)) AS total_pedidos
         FROM 
             entregas_contatos ec where ec.status = 'Pendente' 
         AND 
@@ -108,8 +181,12 @@ exports.listaDadosGeralGerenteSemanaAnterior = async (req, res) => {
       limiteValor,
     ]);
 
+    let acumuladoSemanaAnt =
+      rs.rows.length > 0 ? rs.rows[0].acumuladosemananterior : 0;
+    let total_pedidos = rs.rows.length > 0 ? rs.rows[0].total_pedidos : 0;
     const response = {
-      lista_semana_anterior: rs.rows,
+      lista_semana_anterior: acumuladoSemanaAnt,
+      total_pedidos,
     };
     res.status(200).send(response);
   } catch (error) {
@@ -119,11 +196,10 @@ exports.listaDadosGeralGerenteSemanaAnterior = async (req, res) => {
 };
 
 exports.listaDadosGeralGerenteMesAnterior = async (req, res) => {
-  console.log("******** listaDadosGeralVendedorMesAnterior *********");
-
   let idLoja = req.params.idLoja;
   let sqlVendasPendentesDashVendedorGeralDiaAnterior = `select 
-            SUM(ec.vlr_total) AS acumuladoMesAnterior  
+            SUM(ec.vlr_total) AS acumuladomesanterior  ,
+            COUNT(distinct(ec.np)) AS total_pedidos
         FROM 
             entregas_contatos ec where ec.status = 'Pendente' 
         AND 
@@ -146,8 +222,13 @@ exports.listaDadosGeralGerenteMesAnterior = async (req, res) => {
       limiteValor,
     ]);
 
+    let acumuladoSemanaAnt =
+      rs.rows.length > 0 ? rs.rows[0].acumuladomesanterior : 0;
+    let total_pedidos = rs.rows.length > 0 ? rs.rows[0].total_pedidos : 0;
+
     const response = {
-      lista_mes_ant_vendedor: rs.rows,
+      lista_mes_anterior: acumuladoSemanaAnt,
+      total_pedidos,
     };
     res.status(200).send(response);
   } catch (error) {
@@ -157,12 +238,10 @@ exports.listaDadosGeralGerenteMesAnterior = async (req, res) => {
 };
 
 exports.listaDadosGeralGerenteSeisMeses = async (req, res) => {
-  console.log("******** listaDadosGeralVendedorSeisMeses *********");
-
   let idLoja = req.params.idLoja;
-
   let sqlVendasPendentesDashVendedorGeralSeisMeses = `select 
-            SUM(ec.vlr_total) AS acumuladoSeisMeses  
+            SUM(ec.vlr_total) AS acumuladoseismeses   ,
+            COUNT(distinct(ec.np)) AS total_pedidos
         FROM 
             entregas_contatos ec where ec.status = 'Pendente' 
         AND 
@@ -183,10 +262,12 @@ exports.listaDadosGeralGerenteSeisMeses = async (req, res) => {
       limiteValor,
     ]);
 
-    console.log(rs.rows[0]);
-
+    let acumuladoSeisMeses =
+      rs.rows.length > 0 ? rs.rows[0].acumuladoseismeses : 0;
+    let total_pedidos = rs.rows.length > 0 ? rs.rows[0].total_pedidos : 0;
     const response = {
-      lista_seis_meses: rs.rows,
+      lista_seis_meses: acumuladoSeisMeses,
+      total_pedidos,
     };
     res.status(200).send(response);
   } catch (error) {
@@ -197,10 +278,7 @@ exports.listaDadosGeralGerenteSeisMeses = async (req, res) => {
 
 ///***************** genente x cliente detalhe *************/
 exports.listaDadosGeralGerenteClienteLista = async (req, res) => {
-  console.log("******** listaDadosGeralVendedorClienteLista *********");
-
   let idLoja = req.params.idLoja;
-
   let sqlLista = `SELECT 
                         ec.cod_cliente_pre,
                         LEFT(ec.cliente, 15) AS cliente,
@@ -239,22 +317,11 @@ exports.listaDadosGeralGerenteClienteLista = async (req, res) => {
 
 ///***************** genente x cliente detalhe *************/
 exports.listaDadosGeralGerenteClienteListaDetalhe = async (req, res) => {
-  console.log("******** listaDadosGeralVendedorClienteListaDetalhe *********");
-
   let results = [];
   let cliente = req.params.cliente;
   let idLoja = req.params.idLoja;
 
-  console.log("********************************");
-  console.log(cliente, idLoja);
-  console.log(req.params);
-  console.log("********************************");
-
-  // for (let i = 0; i < rs.rows.length; i++) {
-  // let cliente = rs.rows[i].cod_cliente_pre;
-
   try {
-    // Obter detalhes para diferentes períodos
     let detalhesUmDia = await listaPorClienteGerenteUmDia(idLoja, cliente);
     let detalhesSemanaAnterior = await listaPorClienteGerenteSemanaAnterior(
       idLoja,
@@ -279,7 +346,6 @@ exports.listaDadosGeralGerenteClienteListaDetalhe = async (req, res) => {
       lista_detalhes_cliente: results,
     };
 
-    console.log(response);
     res.status(200).send(response);
   } catch (err) {
     console.error(`Erro ao buscar detalhes do cliente ${cliente}:`, err);
@@ -294,8 +360,6 @@ exports.listaDadosGeralGerenteClienteListaDetalhe = async (req, res) => {
 };
 
 async function listaPorClienteGerenteUmDia(idloja, cod_cliente) {
-  console.log("******** listaPorVendedorClienteUmDia *********");
-
   let sqlVendasPendentesDashVendedorGeralDiaAnterior = `select 
             SUM(ec.vlr_total) AS acumulado  
         FROM 
@@ -324,7 +388,6 @@ async function listaPorClienteGerenteUmDia(idloja, cod_cliente) {
 }
 
 async function listaPorClienteGerenteSemanaAnterior(idloja, cod_cliente) {
-  console.log("******** listaPorVendedorClienteSemanaAnterior *********");
   let sqlVendasPendentesDashVendedorGeralDiaAnterior = `select 
             SUM(ec.vlr_total) AS acumulado  
         FROM 
@@ -355,7 +418,6 @@ async function listaPorClienteGerenteSemanaAnterior(idloja, cod_cliente) {
 }
 
 async function listaPorClienteGerenteMesAnterior(idloja, cod_cliente) {
-  console.log("******** listaPorVendedorClienteMesAnterior *********");
   let sqlVendasPendentesDashVendedorGeralDiaAnterior = `select 
             SUM(ec.vlr_total) AS acumulado  
         FROM 
@@ -386,7 +448,6 @@ async function listaPorClienteGerenteMesAnterior(idloja, cod_cliente) {
 }
 
 async function listaPorClienteGerente180Dias(idloja, cod_cliente) {
-  console.log("******** listaPorVendedorCliente180Dias *********");
   let sqlVendasPendentesDashVendedorGeralDiaAnterior = `select 
             SUM(ec.vlr_total) AS acumulado  
         FROM 
@@ -417,10 +478,7 @@ async function listaPorClienteGerente180Dias(idloja, cod_cliente) {
 /// ************ gerentes x vendedores ******************
 
 exports.listaDadosGeralGerenteVendedoresLista = async (req, res) => {
-  console.log("******** listaDadosGeralVendedorClienteLista *********");
-
   let idLoja = req.params.idLoja;
-
   let sqlLista = `SELECT 
                         ec.cod_vendedor_pre,
                         ec.vendedor  as nome,
@@ -458,13 +516,9 @@ exports.listaDadosGeralGerenteVendedoresLista = async (req, res) => {
 };
 
 exports.listaDadosGeralGerenteVendedoresListaDetalhe = async (req, res) => {
-  console.log("******** listaDadosGeralVendedorClienteListaDetalhe *********");
-
   let results = [];
   let vendedor = req.params.vendedor;
   let idLoja = req.params.idLoja;
-
-  console.log(vendedor, idLoja);
 
   try {
     // Obter detalhes para diferentes períodos
@@ -495,7 +549,6 @@ exports.listaDadosGeralGerenteVendedoresListaDetalhe = async (req, res) => {
       lista_detalhes_vendedores: results,
     };
 
-    console.log(response);
     res.status(200).send(response);
   } catch (err) {
     console.error(`Erro ao buscar detalhes do cliente ${vendedor}:`, err);
@@ -511,8 +564,6 @@ exports.listaDadosGeralGerenteVendedoresListaDetalhe = async (req, res) => {
 
 //************ DETALHES GERENTE X VENDEDORES  *******************/
 async function listaPorVendedorGerenteUmDia(idloja, vendedor) {
-  console.log("******** listaPorVendedorGerenteUmDia *********");
-
   let sqlVendasPendentesDashVendedorGeralDiaAnterior = `select 
               SUM(ec.vlr_total) AS acumulado  
           FROM 
@@ -545,7 +596,6 @@ async function listaPorVendedorGerenteUmDia(idloja, vendedor) {
 }
 
 async function listaPorVendedorGerenteSemanaAnterior(idloja, vendedor) {
-  console.log("******** listaPorVendedorGerenteSemanaAnterior *********");
   let sqlVendasPendentesDashVendedorGeralDiaAnterior = `select 
               SUM(ec.vlr_total) AS acumulado  
           FROM 
@@ -580,7 +630,6 @@ async function listaPorVendedorGerenteSemanaAnterior(idloja, vendedor) {
 }
 
 async function listaPorVendedorGerenteMesAnterior(idloja, vendedor) {
-  console.log("******** listaPorVendedorGerenteMesAnterior *********");
   let sqlVendasPendentesDashVendedorGeralDiaAnterior = `select 
               SUM(ec.vlr_total) AS acumulado  
           FROM 
@@ -615,7 +664,6 @@ async function listaPorVendedorGerenteMesAnterior(idloja, vendedor) {
 }
 
 async function listaPorVendedorGerente180Dias(idloja, vendedor) {
-  console.log("******** listaPorVendedorGerente180Dias *********");
   let sqlVendasPendentesDashVendedorGeralDiaAnterior = `select 
               SUM(ec.vlr_total) AS acumulado  
           FROM 
@@ -650,11 +698,7 @@ async function listaPorVendedorGerente180Dias(idloja, vendedor) {
 ///gernte x indicador
 
 exports.listaDadosGerenteIndicadorLista = async (req, res) => {
-  console.log("******** listaDadosGeralVendedorIndicadorLista *********");
-
   let idLoja = req.params.idLoja;
-
-  // Consulta para obter os indicadores e os valores totais
   let sqlLista = `
     SELECT 
         ec.cod_indica_pre, 
@@ -722,15 +766,9 @@ exports.listaDadosGerenteIndicadorLista = async (req, res) => {
 };
 
 exports.listaDadosGerenteIndicadorListaDetalhe = async (req, res) => {
-  console.log("******** listaDadosGeralVendedorClienteListaDetalhe *********");
-  console.log("******** listaDadosGeralVendedorClienteListaDetalhe *********");
-  console.log("******** listaDadosGeralVendedorClienteListaDetalhe *********");
-
   let results = [];
   let indicador = req.params.indicador;
   let idLoja = req.params.idLoja;
-
-  console.log(indicador, idLoja);
 
   try {
     // Obter detalhes para diferentes períodos
@@ -761,7 +799,6 @@ exports.listaDadosGerenteIndicadorListaDetalhe = async (req, res) => {
       lista_detalhes_indicadores: results,
     };
 
-    console.log(response);
     res.status(200).send(response);
   } catch (err) {
     console.error(`Erro ao buscar detalhes do cliente ${indicador}:`, err);
@@ -776,8 +813,6 @@ exports.listaDadosGerenteIndicadorListaDetalhe = async (req, res) => {
 };
 
 async function listaPorIndicadorGerenteUmDia(idLoja, indicador) {
-  console.log("******** listaPorIndicadorGerenteUmDia *********");
-
   let sqlVendasPendentesDashVendedorGeralDiaAnterior = `select 
           SUM(ec.vlr_total) AS acumulado  
       FROM 
@@ -810,7 +845,6 @@ async function listaPorIndicadorGerenteUmDia(idLoja, indicador) {
 }
 
 async function listaPorIndicadorGerenteSemanaAnterior(idLoja, indicador) {
-  console.log("******** listaPorIndicadorGerenteSemanaAnterior *********");
   let sqlVendasPendentesDashVendedorGeralDiaAnterior = `select 
           SUM(ec.vlr_total) AS acumulado  
       FROM 
@@ -845,7 +879,6 @@ async function listaPorIndicadorGerenteSemanaAnterior(idLoja, indicador) {
 }
 
 async function listaPorIndicadorGerenteMesAnterior(idLoja, indicador) {
-  console.log("******** listaPorIndicadorGerenteMesAnterior *********");
   let sqlVendasPendentesDashVendedorGeralDiaAnterior = `select 
           SUM(ec.vlr_total) AS acumulado  
       FROM 
@@ -880,7 +913,6 @@ async function listaPorIndicadorGerenteMesAnterior(idLoja, indicador) {
 }
 
 async function listaPorIndicadorGerente180Dias(idLoja, cod_cliente) {
-  console.log("******** listaPorIndicadorGerente180Dias *********");
   let sqlVendasPendentesDashVendedorGeralDiaAnterior = `select 
           SUM(ec.vlr_total) AS acumulado  
       FROM 
@@ -899,7 +931,6 @@ async function listaPorIndicadorGerente180Dias(idLoja, cod_cliente) {
           SUM(ec.vlr_total) > $3`;
 
   let rs;
-  console.log(sqlVendasPendentesDashVendedorGeralDiaAnterior);
   try {
     rs = await pg.execute(sqlVendasPendentesDashVendedorGeralDiaAnterior, [
       idLoja,
@@ -914,12 +945,8 @@ async function listaPorIndicadorGerente180Dias(idLoja, cod_cliente) {
 }
 
 exports.listaDadosGerenteGeralNps = async (req, res) => {
-  console.log("******** listaDadosVendedorClientesNps *********");
-
   let periodo = req.params.periodo;
   let idLoja = req.params.idLoja;
-  console.log("periodo: " + periodo, "idLoja: " + idLoja);
-
   let sqlSelecionado = "";
   if (periodo == "HOJE") {
     sqlSelecionado = " AND ec.data_pre = CURRENT_DATE ";
@@ -964,12 +991,9 @@ exports.listaDadosGerenteGeralNps = async (req, res) => {
                 SUM(ec.vlr_total) > $2
             ORDER BY 
                 acumulado DESC`;
-  console.log(sql);
   let rs;
   try {
     rs = await pg.execute(sql, [idLoja, limiteValor]);
-
-    console.log(rs.rows[0]);
 
     const response = {
       lista_nps_cliente: rs.rows,
