@@ -116,7 +116,7 @@ exports.listaDadosGeralGerenteHoje = async (req, res) => {
 exports.listaDadosGeralGerenteDiaAnterior = async (req, res) => {
   let idLoja = req.params.idLoja;
   let sqlVendasPendentesDashVendedorGeralDiaAnterior = `select 
-            SUM(ec.vlr_total) AS acumuladoUmDia ,
+            SUM(ec.vlr_total) AS acumuladoumdia ,
             COUNT(distinct(ec.np)) AS total_pedidos 
         FROM 
             entregas_contatos ec 
@@ -140,7 +140,7 @@ exports.listaDadosGeralGerenteDiaAnterior = async (req, res) => {
       limiteValor,
     ]);
 
-    let acumuladoDiaAnt = rs.rows.length > 0 ? rs.rows[0].acumuladoUmDia : 0;
+    let acumuladoDiaAnt = rs.rows.length > 0 ? rs.rows[0].acumuladoumdia : 0;
     let total_pedidos = rs.rows.length > 0 ? rs.rows[0].total_pedidos : 0;
 
     const response = {
