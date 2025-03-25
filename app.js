@@ -7,7 +7,7 @@ const cron = require("node-cron");
 const testeController = require("./controllers/entregas_contatos_controller");
 
 // // Defina a tarefa agendada para rodar às 14:30 todos os dias
-cron.schedule("00 23 * * *", async () => {
+cron.schedule("00 17 * * *", async () => {
   console.log("Agendador executando às 23:00 horas...");
   console.log("Agendador executando...");
   await testeController.buscarDadosEntregasGeral();
