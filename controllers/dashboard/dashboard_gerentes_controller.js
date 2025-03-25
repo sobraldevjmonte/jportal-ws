@@ -141,7 +141,7 @@ exports.listaDadosGeralGerenteDiaAnterior = async (req, res) => {
     let total_pedidos = rs.rows.length > 0 ? rs.rows[0].total_pedidos : 0;
 
     const response = {
-      lista_um_dia_vendedor: acumuladoDiaAnt,
+      acumuladoumdia: acumuladoDiaAnt,
       total_pedidos,
     };
     res.status(200).send(response);
@@ -182,7 +182,7 @@ exports.listaDadosGeralGerenteSemanaAnterior = async (req, res) => {
       rs.rows.length > 0 ? rs.rows[0].acumuladosemananterior : 0;
     let total_pedidos = rs.rows.length > 0 ? rs.rows[0].total_pedidos : 0;
     const response = {
-      lista_semana_anterior: acumuladoSemanaAnt,
+      acumuladosemananterior: acumuladoSemanaAnt,
       total_pedidos,
     };
     res.status(200).send(response);
@@ -224,7 +224,7 @@ exports.listaDadosGeralGerenteMesAnterior = async (req, res) => {
     let total_pedidos = rs.rows.length > 0 ? rs.rows[0].total_pedidos : 0;
 
     const response = {
-      lista_mes_anterior: acumuladoSemanaAnt,
+      acumuladomesanterior: acumuladoSemanaAnt,
       total_pedidos,
     };
     res.status(200).send(response);
@@ -263,7 +263,7 @@ exports.listaDadosGeralGerenteSeisMeses = async (req, res) => {
       rs.rows.length > 0 ? rs.rows[0].acumuladoseismeses : 0;
     let total_pedidos = rs.rows.length > 0 ? rs.rows[0].total_pedidos : 0;
     const response = {
-      lista_seis_meses: acumuladoSeisMeses,
+      acumuladoseismeses: acumuladoSeisMeses,
       total_pedidos,
     };
     res.status(200).send(response);
