@@ -237,7 +237,6 @@ exports.listaDadosGeralVendedorHoje = async (req, res) => {
       limiteValor,
     ]);
 
-    console.log(rs)
 
     const response = {
       lista_hoje_vendedor: rs.rows,
@@ -275,7 +274,6 @@ exports.listaDadosGeralVendedorDiaAnterior = async (req, res) => {
       codigoVendedor,
       limiteValor,
     ]);
-
     const response = {
       lista_um_dia_vendedor: rs.rows,
     };
