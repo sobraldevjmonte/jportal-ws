@@ -11,7 +11,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 exports.buscarDadosEntregasGeral = async (req, res) => {
-  console.log("**********  scheduller importar entragas_contatos **********");
+  console.log("**********  scheduller importar entragas_contatos Geral **********");
 
   const sqlDump = "TRUNCATE TABLE entregas_contatos CASCADE";
   try {
@@ -366,12 +366,12 @@ exports.listarEntregasContatosVendedor = async (req, res) => {
 
   let idVendedor = req.params.idVendedor;
   let codigLoja = req.params.codigLoja;
-  console.log("idVendedor: " + idVendedor);
-  console.log("codigLoja: " + codigLoja);
+  console.log("idVendedor: " + idVendedor)
+  console.log("codigLoja: " + codigLoja)
 
-  let sqlFiltro = "";
-  if (codigLoja != "ALL") {
-    sqlFiltro = " AND ec.codloja = $2 ";
+  let sqlFiltro = "" 
+  if(codigLoja !=  'ALL'){
+    sqlFiltro = " AND ec.codloja = $2 " 
   }
 
   console.log(idVendedor);
@@ -399,8 +399,7 @@ exports.listarEntregasContatosVendedor = async (req, res) => {
     "LEFT JOIN entregas_contatos_detallhes ecd ON " +
     "   REPLACE(ec.np, ' ', '') = ecd.np " +
     "WHERE " +
-    "   ec.cod_vendedor_pre = $1 " +
-    sqlFiltro +
+    "   ec.cod_vendedor_pre = $1 " +  sqlFiltro +
     "AND " +
     "   ec.status = 'Finalizado' " +
     "AND " +
@@ -417,9 +416,9 @@ exports.listarEntregasContatosVendedor = async (req, res) => {
   console.log(sqlEntregasContatos);
   let rs;
   try {
-    if (codigLoja != "ALL") {
+    if(codigLoja != 'ALL'){
       rs = await pg.execute(sqlEntregasContatos, [idVendedor, codigLoja]);
-    } else {
+    }else{
       rs = await pg.execute(sqlEntregasContatos, [idVendedor]);
     }
     let countEntregas = rs.rows.length;
@@ -438,7 +437,8 @@ exports.listarEntregasContatosVendedor = async (req, res) => {
 exports.listaLojasDoAdmin = async (req, res) => {
   console.log("******** listaLojasDoAdmin *********");
 
-  let sqlListaLojasDoAdmin = `select l."idLoja", l."codigoLoja", l.icomp, l.fantasia from lojas l order by l."idLoja"`;
+  let sqlListaLojasDoAdmin = 
+    `select l."idLoja", l."codigoLoja", l.icomp, l.fantasia from lojas l order by l."idLoja"`;
   console.log(sqlListaLojasDoAdmin);
 
   try {
@@ -454,7 +454,7 @@ exports.listaLojasDoAdmin = async (req, res) => {
     console.log(error);
     return res.status(404).send({ error: error, mensagem: "Erro ao procurar" });
   }
-};
+}
 exports.listaVendedoresDoGerente = async (req, res) => {
   console.log("******** listarEntregasContatosGerente *********");
 
