@@ -1,5 +1,5 @@
-// const pg = require("../conexao_jmonte_prod");
-const pg = require("../conexao_jm");
+const pg = require("../conexao_jmonte_prod");
+// const pg = require("../conexao_jm");
 const moment = require("moment");
 
 exports.listarVendasPorLojaAnoAnterior = async (req, res) => {
