@@ -475,7 +475,6 @@ exports.listaContatosFeitosParaCliente = async (req, res) => {
   //    FROM "vendasPendentesPendencias" vp WHERE vp."codigoIcomp" = $1`;
 
   console.log(sqlCountVendedores);
-  /********************************************************/
   try {
     let rsCount = await pg.execute(sqlCountVendedores, [idCliente]);
     let countVendedores = rsCount.rows.length;
