@@ -465,7 +465,7 @@ exports.listaContatosFeitosParaCliente = async (req, res) => {
     " JOIN usuarios u on " +
     ' cast(c.idvendedor as INTEGER) = u."idUsuario" ' +
     " WHERE " +
-    '     c."idcliente" = $1 ' +
+    '     c."codigoIcomp" = $1 ' +
     "ORDER BY " +
     '     c."datacontato"';
   // let sqlCountVendedores =
