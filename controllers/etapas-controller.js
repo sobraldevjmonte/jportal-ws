@@ -458,20 +458,21 @@ exports.listaContatosFeitosParaCliente = async (req, res) => {
   );
 
   /********************************************************/
-  // let sqlCountVendedores =
-  //   "SELECT TO_CHAR(c.datacontato,'DD/MM/YYYY') AS datacontato " +
-  //   ', c.observacao, u."nomeUsuario", u."nomeUsuario" as nomeVendedor ' +
-  //   'FROM "vendasPendentesFinalContatoFeitoClientes" c ' +
-  //   " JOIN usuarios u on " +
-  //   ' cast(c.idvendedor as INTEGER) = u."idUsuario" ' +
-  //   " WHERE " +
-  //   '     c."idcliente" = $1 ' +
-  //   "ORDER BY " +
-  //   '     c."datacontato"';
   let sqlCountVendedores =
-    `SELECT 
-     TO_CHAR(vp."dataPendencia",'DD/MM/YYYY') AS datacontato
-     FROM "vendasPendentesPendencias" vp WHERE vp."idCliente" = $1`;
+    "SELECT TO_CHAR(c.datacontato,'DD/MM/YYYY') AS datacontato " +
+    ', c.observacao, u."nomeUsuario", u."nomeUsuario" as nomeVendedor ' +
+    'FROM "vendasPendentesFinalContatoFeitoClientes" c ' +
+    " JOIN usuarios u on " +
+    ' cast(c.idvendedor as INTEGER) = u."idUsuario" ' +
+    " WHERE " +
+    '     c."idcliente" = $1 ' +
+    "ORDER BY " +
+    '     c."datacontato"';
+  // let sqlCountVendedores =
+  //   `SELECT 
+  //    TO_CHAR(vp."dataPendencia",'DD/MM/YYYY') AS datacontato,
+  //    vp.*
+  //    FROM "vendasPendentesPendencias" vp WHERE vp."codigoIcomp" = $1`;
 
   console.log(sqlCountVendedores);
   /********************************************************/

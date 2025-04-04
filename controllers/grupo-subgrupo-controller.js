@@ -1,5 +1,5 @@
-const pg = require("../conexao_jmonte_prod");
-// const pg = require("../conexao_jm");
+// const pg = require("../conexao_jmonte_prod");
+const pg = require("../conexao_jm");
 const moment = require("moment");
 
 exports.listarVendasPorLojaAnoAnterior = async (req, res) => {
@@ -173,7 +173,10 @@ exports.listarGrupos = async (req, res) => {
   let mes = parseInt(req.params.mes); // Pegando o mês como parâmetro
   let ano = new Date().getFullYear(); // Ano atual
 
+  console.log('******** listarGrupos ***************')
+  console.log(loja, mes, ano);
   // Ajustar ano se o mês for janeiro
+  mes = +mes
   if (mes === 1) {
     console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxx')
     mes = 12;
@@ -183,12 +186,13 @@ exports.listarGrupos = async (req, res) => {
     mes -= 1; // Mês anterior
   }
 
-  mes = 11;
-  ano = 2024
+  //mes = 11;
+  //ano = 2024
 
   let params = [loja, mes, ano];
-  console.log("------------- listarGrupos -------------------");
+  console.log('dados convertidos: ' ) 
   console.log(loja, mes, ano);
+  console.log('dados convertidos: ' ) 
 
   let sqlLListaGrupos = `
     SELECT 

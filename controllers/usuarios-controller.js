@@ -8,7 +8,7 @@ exports.login = async (req, res) => {
   let senha = x.senha;
   let ativo = "S";
 
-  console.log(usuario)
+  console.log(usuario, senha)
 
   let sqlLogin =
     'SELECT u."idUsuario" as idusuario, ' +
